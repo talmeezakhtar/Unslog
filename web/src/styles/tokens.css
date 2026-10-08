@@ -1,0 +1,70 @@
+/*
+ * Design tokens. Restyle the whole app from here: colours, type, spacing, radii.
+ * Palette idea: cool sea-salt ground, deep gulf-green ink, one teal for actions you take,
+ * and a date-palm amber reserved for "needs your attention" (follow-ups, visa warnings).
+ */
+:root {
+  --ground: #f4f6f4;
+  --surface: #ffffff;
+  --surface-sunken: #e9eeeb;
+  --ink: #15211e;
+  --ink-muted: #4f5d59;
+  --line: #d5ddd9;
+  --line-strong: #a9b6b1;
+
+  --action: #0f6b5c;
+  --action-ink: #ffffff;
+  --action-soft: #dcefe9;
+  --attention: #9a5b0c;
+  --attention-soft: #fbefd9;
+  --danger: #a3302a;
+  --good: #2f6f35;
+  /* Chart series colours, checked for colour-blind separation and contrast (light + dark). */
+  --chart-1: #00806b;
+  --chart-2: #a35f00;
+
+  --font-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Atkinson Hyperlegible', 'Segoe UI', system-ui, sans-serif;
+
+  /* Type scale (1.25 ratio) */
+  --text-xs: 0.8rem;
+  --text-sm: 0.9rem;
+  --text-md: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.563rem;
+  --text-2xl: 2.441rem;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --focus: 0 0 0 3px color-mix(in srgb, var(--action) 45%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #0f1715;
+    --surface: #17221f;
+    --surface-sunken: #1f2c28;
+    --ink: #e6eeeb;
+    --ink-muted: #a5b5b0;
+    --line: #2c3b37;
+    --line-strong: #4a5c57;
+    --action: #4fbba7;
+    --action-ink: #0b1513;
+    --action-soft: #1d3a34;
+    --attention: #e9b45e;
+    --attention-soft: #3a2c14;
+    --danger: #f08a83;
+    --good: #8ccf8f;
+    --chart-1: #36a58f;
+    --chart-2: #bf8228;
+  }
+}

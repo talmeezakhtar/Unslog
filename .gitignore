@@ -1,0 +1,13 @@
+node_modules
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+# Real emails saved for tuning parsers. Never commit these: they contain your inbox.
+pipeline/test/fixtures/private/
+# Supabase CLI local state
+supabase/.branches
+supabase/.temp

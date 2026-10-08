@@ -1,0 +1,24 @@
+{
+  "name": "callback",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Callback: a free job-hunt copilot for the UAE. Finds jobs every morning, ranks them against your profile, drafts applications and outreach, and tracks follow-ups.",
+  "license": "MIT",
+  "workspaces": [
+    "pipeline",
+    "web"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces",
+    "test": "npm run test --workspace pipeline",
+    "build": "npm run build --workspace web",
+    "pipeline": "npm run start --workspace pipeline --",
+    "dev": "npm run dev --workspace web",
+    "db:migrate": "npm run db:migrate --workspace pipeline",
+    "gmail:auth": "npm run gmail:auth --workspace pipeline --",
+    "gmail:sample": "npm run gmail:sample --workspace pipeline --"
+  }
+}

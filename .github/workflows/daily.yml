@@ -1,0 +1,49 @@
+# The morning run. GitHub runs this for free on a schedule; no server needed.
+# Set the secrets in: GitHub repo > Settings > Secrets and variables > Actions.
+name: Daily pipeline
+
+on:
+  schedule:
+    # 02:47 UTC = 06:47 in Dubai. GitHub may start scheduled jobs a few minutes late.
+    - cron: '47 2 * * *'
+  workflow_dispatch:
+    inputs:
+      steps:
+        description: 'Comma-separated steps (blank = all): collect,match,score,followups,draft,digest'
+        required: false
+        default: ''
+
+concurrency:
+  group: daily-pipeline
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      # Uses package-lock.json when it's committed (commit it after your first npm install).
+      - run: npm install --no-audit --no-fund
+      - name: Run pipeline
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          APP_URL: ${{ vars.APP_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          JOOBLE_API_KEY: ${{ secrets.JOOBLE_API_KEY }}
+          GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
+          GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
+          GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          ALLOWED_USER_IDS: ${{ vars.ALLOWED_USER_IDS }}
+          STEPS: ${{ github.event.inputs.steps }}
+        run: |
+          if [ -n "$STEPS" ]; then
+            npm run pipeline -- run --steps "$STEPS"
+          else
+            npm run pipeline -- run
+          fi

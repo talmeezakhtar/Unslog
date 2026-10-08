@@ -1,0 +1,28 @@
+{
+  "name": "@callback/pipeline",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Collects UAE jobs, deduplicates, filters, scores with free AI, drafts messages and sends the morning digest.",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "gmail:auth": "tsx src/scripts/gmail-auth.ts",
+    "gmail:sample": "tsx src/scripts/gmail-sample.ts",
+    "db:migrate": "tsx src/scripts/migrate.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test --test-concurrency=1 \"test/**/*.test.ts\""
+  },
+  "dependencies": {
+    "domhandler": "^5.0.3",
+    "domutils": "^3.1.0",
+    "htmlparser2": "^9.1.0",
+    "pg": "^8.13.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.0",
+    "@types/pg": "^8.11.10",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3"
+  }
+}
