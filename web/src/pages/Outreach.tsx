@@ -192,7 +192,7 @@ export function Outreach() {
                   Log as sent
                 </button>
               </div>
-              <p className="xs muted">You send the message yourself. Callback only keeps track of it.</p>
+              <p className="xs muted">You send the message yourself. Unslog only keeps track of it.</p>
             </form>
           )}
         </section>

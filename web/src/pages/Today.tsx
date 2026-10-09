@@ -21,8 +21,8 @@ export function Today() {
   if (!me.loading && !me.data) {
     return (
       <section className="panel">
-        <h1 className="greeting">Welcome to Callback</h1>
-        <p>Tell Callback what you're looking for. It uses your skills, cities and visa status to filter and rank jobs every morning.</p>
+        <h1 className="greeting">Welcome to Unslog</h1>
+        <p>Tell Unslog what you're looking for. It uses your skills, cities and visa status to filter and rank jobs every morning.</p>
         <div>
           <Link to="/settings" className="btn btn-primary">
             Set up your profile

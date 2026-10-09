@@ -63,7 +63,7 @@ export function JobRow({ match, action }: { match: Match; action?: ReactNode }) 
         <JobMeta match={match} />
         <JobTags match={match} />
       </div>
-      {action}
+      {action && <div className="job-row-actions">{action}</div>}
     </div>
   );
 }

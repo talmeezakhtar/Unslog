@@ -26,7 +26,8 @@ export function SignIn() {
       <div className="auth-card">
         <Logo />
         <h1>Fewer applications. More callbacks.</h1>
-        <p className="muted">Every morning Callback finds new UAE jobs, ranks them against your profile and drafts what to send. You decide what goes out.</p>
+        <p className="muted">Every morning Unslog finds new UAE jobs, ranks them against your profile and drafts what to send. You decide what goes out.</p>
+        <div className="tear" aria-hidden="true" />
         {!isConfigured && (
           <p className="notice">
             Supabase isn't connected yet. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env, then restart the dev server. See docs/01-getting-started.md.

@@ -26,6 +26,13 @@ export function Pipeline() {
 
   return (
     <>
+      {/* Roughens the VOID stamp's border and type into an inked, hand-stamped edge instead of a clean vector box. */}
+      <svg width="0" height="0" aria-hidden="true" style={{ position: 'absolute' }}>
+        <filter id="stampRough">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.5" />
+        </filter>
+      </svg>
       <header className="page-head">
         <div>
           <h1>Pipeline</h1>
@@ -58,7 +65,7 @@ export function Pipeline() {
                   {lane.hint}
                 </p>
                 {cards.map((a) => (
-                  <article key={a.id} className="card">
+                  <article key={a.id} className={`card ${lane.status === 'closed' ? 'card-void' : ''}`}>
                     <Link to={`/jobs/${a.job_id}`} className="job-title" style={{ fontSize: '0.95rem' }}>
                       {a.job?.title ?? 'Job'}
                     </Link>

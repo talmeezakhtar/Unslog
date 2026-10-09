@@ -16,9 +16,9 @@ const NAV = [
 export function Logo() {
   return (
     <svg className="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
-      <rect width="32" height="32" rx="8" fill="var(--action)" />
-      <path d="M21.5 10.5a8 8 0 1 0 0 11" fill="none" stroke="var(--action-ink)" strokeWidth="3.2" strokeLinecap="round" />
-      <circle cx="22.5" cy="16" r="2.2" fill="#E3A33B" />
+      <rect width="32" height="32" rx="7" fill="var(--action)" />
+      <path d="M8 19 L20 9 M14 9 H20 V15" fill="none" stroke="var(--action-ink)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8 22.5 H17 M8 26 H23" stroke="var(--action-ink)" strokeWidth="3" strokeLinecap="round" />
     </svg>
   );
 }
@@ -34,7 +34,7 @@ export function Layout({ children, email }: { children: ReactNode; email: string
       <nav className="sidebar" aria-label="Main">
         <Link to="/" className="brand">
           <Logo />
-          <span className="brand-name">Callback</span>
+          <span className="brand-name">Unslog</span>
         </Link>
         {NAV.map((n) => (
           <Link key={n.to} to={n.to} className="nav-link" aria-current={active(n.to) ? 'page' : undefined}>

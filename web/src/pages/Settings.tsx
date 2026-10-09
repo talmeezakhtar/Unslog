@@ -249,7 +249,7 @@ function Searches() {
   return (
     <section className="panel" aria-labelledby="search-h">
       <h2 id="search-h">Jooble searches</h2>
-      <p className="small muted">Keyword searches Callback runs across UAE job sites. Without any, it searches your target job titles.</p>
+      <p className="small muted">Keyword searches Unslog runs across UAE job sites. Without any, it searches your target job titles.</p>
       <ErrorBox error={list.error ?? act.error} />
       {(list.data?.length ?? 0) > 0 && (
         <ul className="list">

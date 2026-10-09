@@ -1,30 +1,33 @@
 /*
  * Design tokens. Restyle the whole app from here: colours, type, spacing, radii.
- * Palette idea: cool sea-salt ground, deep gulf-green ink, one teal for actions you take,
- * and a date-palm amber reserved for "needs your attention" (follow-ups, visa warnings).
+ * Palette: coupon-stock paper, carrier-navy ink, jet-red as the one committed working
+ * accent (buttons, live state, score stamps), carbon-purple reserved for duplicate
+ * sightings / follow-ups, so a job seen on three sites and a job due for a nudge never
+ * read as the same signal.
  */
 :root {
-  --ground: #f4f6f4;
-  --surface: #ffffff;
-  --surface-sunken: #e9eeeb;
-  --ink: #15211e;
-  --ink-muted: #4f5d59;
-  --line: #d5ddd9;
-  --line-strong: #a9b6b1;
+  --ground: #f3efe4;
+  --surface: #fffdf8;
+  --surface-sunken: #ece7d8;
+  --ink: #13203a;
+  --ink-muted: #5b6273;
+  --line: #d9d2bf;
+  --line-strong: #a9a08a;
 
-  --action: #0f6b5c;
-  --action-ink: #ffffff;
-  --action-soft: #dcefe9;
-  --attention: #9a5b0c;
-  --attention-soft: #fbefd9;
-  --danger: #a3302a;
-  --good: #2f6f35;
+  --action: #d7262d;
+  --action-ink: #fffdf8;
+  --action-soft: #fbe2df;
+  --attention: #4b2e83;
+  --attention-soft: #e7e0f3;
+  --danger: #b0191f;
+  --good: #1f6b4d;
   /* Chart series colours, checked for colour-blind separation and contrast (light + dark). */
-  --chart-1: #00806b;
-  --chart-2: #a35f00;
+  --chart-1: #d7262d;
+  --chart-2: #13203a;
 
-  --font-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
-  --font-body: 'Atkinson Hyperlegible', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Big Shoulders Display', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   /* Type scale (1.25 ratio) */
   --text-xs: 0.8rem;
@@ -42,29 +45,29 @@
   --space-6: 32px;
   --space-7: 48px;
 
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 8px;
   --focus: 0 0 0 3px color-mix(in srgb, var(--action) 45%, transparent);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --ground: #0f1715;
-    --surface: #17221f;
-    --surface-sunken: #1f2c28;
-    --ink: #e6eeeb;
-    --ink-muted: #a5b5b0;
-    --line: #2c3b37;
-    --line-strong: #4a5c57;
-    --action: #4fbba7;
-    --action-ink: #0b1513;
-    --action-soft: #1d3a34;
-    --attention: #e9b45e;
-    --attention-soft: #3a2c14;
-    --danger: #f08a83;
-    --good: #8ccf8f;
-    --chart-1: #36a58f;
-    --chart-2: #bf8228;
+    --ground: #10161f;
+    --surface: #182030;
+    --surface-sunken: #1f2a3d;
+    --ink: #eceef3;
+    --ink-muted: #9aa3b8;
+    --line: #2d3b52;
+    --line-strong: #495a79;
+    --action: #ef5a52;
+    --action-ink: #10161f;
+    --action-soft: #3a2024;
+    --attention: #b6a3e8;
+    --attention-soft: #2a2447;
+    --danger: #ff8178;
+    --good: #6fcf9e;
+    --chart-1: #ef5a52;
+    --chart-2: #b6a3e8;
   }
 }
