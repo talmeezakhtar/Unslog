@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { boardUrl, mapAshby, mapGreenhouse, mapLever, mapSmartRecruiters, mapWorkable, sourceKey } from '../src/collectors/ats.js';
-import { alertQuery } from '../src/collectors/gmail/index.js';
+import { alertQuery, windowDays } from '../src/collectors/gmail/index.js';
 import { mapJoobleJob } from '../src/collectors/jooble.js';
 import { redact } from '../src/lib/http.js';
 
@@ -75,6 +75,13 @@ describe('company ATS boards', () => {
 describe('helpers', () => {
   it('Gmail query covers the four alert senders', () => {
     assert.equal(alertQuery(3), 'from:(indeed.com OR linkedin.com OR bayt.com OR naukrigulf.com) newer_than:3d');
+  });
+
+  it('narrows the Gmail window to just past the last successful run', () => {
+    assert.equal(windowDays(null, 3), 3, 'no previous run: use the configured fallback');
+    assert.equal(windowDays(new Date(Date.now() - 1 * 86_400_000), 3), 2, 'ran 1 day ago: 1 day + 1 day buffer');
+    assert.equal(windowDays(new Date(Date.now() - 10 * 86_400_000), 3), 11, 'catches up fully after a long gap, even past the fallback');
+    assert.equal(windowDays(new Date(), 3), 1, 'ran moments ago: never less than 1 day');
   });
 
   it('redacts keys from URLs before logging', () => {

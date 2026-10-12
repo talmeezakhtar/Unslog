@@ -152,7 +152,7 @@ describe('pipeline end to end (real Postgres)', { skip: !TEST_DATABASE_URL && 's
     assert.match(matches.rows[1]!.prefilter_reason, /Abu Dhabi/);
     assert.match(matches.rows[2]!.prefilter_reason, /10\+ years/);
     assert.equal(matches.rows[0]!.score, 91);
-    assert.equal(matches.rows[0]!.model, 'fake/fake-1');
+    assert.equal(matches.rows[0]!.model, 'fake/fake-1@score-v1');
 
     // Drafts for the top job, and AI usage was counted.
     const drafts = await db.query(`select type, content from drafts where user_id = $1 order by type`, [userId]);

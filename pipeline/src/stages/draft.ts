@@ -1,5 +1,5 @@
 import { NoProviderAvailable, type AiRouter } from '../ai/index.js';
-import { coverNotePrompt, followUpPrompt, outreachPrompt } from '../ai/prompts.js';
+import { coverNotePrompt, followUpPrompt, outreachPrompt, profileInputHash, PROMPT_VERSION } from '../ai/prompts.js';
 import type { Repo } from '../db/repo.js';
 import { errorMessage, log } from '../lib/log.js';
 import { truncate } from '../lib/text.js';
@@ -48,11 +48,17 @@ export function templateFollowUp(p: Profile, job: { title: string; company: stri
     .trim();
 }
 
-async function aiOrTemplate(ai: AiRouter, enabled: { value: boolean }, prompt: Parameters<AiRouter['text']>[1], fallback: string): Promise<{ text: string; model: string }> {
+async function aiOrTemplate(
+  ai: AiRouter,
+  enabled: { value: boolean },
+  prompt: Parameters<AiRouter['text']>[1],
+  fallback: string,
+  version: string,
+): Promise<{ text: string; model: string }> {
   if (enabled.value) {
     try {
       const { data, model } = await ai.text('draft', prompt);
-      return { text: data, model };
+      return { text: data, model: `${model}@${version}` };
     } catch (err) {
       if (err instanceof NoProviderAvailable) enabled.value = false;
       log.warn('draft failed, using template', { error: errorMessage(err).slice(0, 200) });
@@ -64,18 +70,19 @@ async function aiOrTemplate(ai: AiRouter, enabled: { value: boolean }, prompt: P
 /** Cover note + outreach note for the top jobs, and follow-up drafts for applications that went quiet. */
 export async function writeDrafts(repo: Repo, ai: AiRouter, profile: Profile, topN: number): Promise<{ jobs: number; followUps: number }> {
   const enabled = { value: ai.hasProviders };
-  const jobs = await repo.toDraft(profile.userId, profile.minScore, topN);
+  const profileHash = profileInputHash(profile);
+  const jobs = await repo.toDraft(profile.userId, profile.minScore, topN, profileHash);
   for (const job of jobs) {
-    const cover = await aiOrTemplate(ai, enabled, coverNotePrompt(profile, job), templateCoverNote(profile, job));
-    await repo.saveDraft(profile.userId, job.id, 'cover_note', cover.text, cover.model);
-    const note = await aiOrTemplate(ai, enabled, outreachPrompt(profile, job), templateOutreach(profile, job));
-    await repo.saveDraft(profile.userId, job.id, 'outreach', truncate(note.text, 300), note.model);
+    const cover = await aiOrTemplate(ai, enabled, coverNotePrompt(profile, job), templateCoverNote(profile, job), PROMPT_VERSION.coverNote);
+    await repo.saveDraft(profile.userId, job.id, 'cover_note', cover.text, cover.model, profileHash);
+    const note = await aiOrTemplate(ai, enabled, outreachPrompt(profile, job), templateOutreach(profile, job), PROMPT_VERSION.outreach);
+    await repo.saveDraft(profile.userId, job.id, 'outreach', truncate(note.text, 300), note.model, profileHash);
   }
 
   const due = await repo.followUpsWithoutDraft(profile.userId);
   for (const f of due) {
     const days = f.appliedAt ? Math.round((Date.now() - new Date(f.appliedAt).getTime()) / 86_400_000) : profile.followUpDays;
-    const msg = await aiOrTemplate(ai, enabled, followUpPrompt(profile, f, days), templateFollowUp(profile, f));
+    const msg = await aiOrTemplate(ai, enabled, followUpPrompt(profile, f, days), templateFollowUp(profile, f), PROMPT_VERSION.followUp);
     await repo.saveDraft(profile.userId, f.jobId, 'follow_up', msg.text, msg.model);
   }
   return { jobs: jobs.length, followUps: due.length };

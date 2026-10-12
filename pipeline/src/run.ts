@@ -1,5 +1,5 @@
 import { buildRouter, type AiRouter } from './ai/index.js';
-import { buildCollectors } from './collectors/index.js';
+import { buildCollectors, buildPersonalCollectors } from './collectors/index.js';
 import type { Collector, RawJob } from './collectors/types.js';
 import type { Config } from './config.js';
 import type { Repo } from './db/repo.js';
@@ -24,9 +24,20 @@ export interface RunSummary {
  * Stores one collector's jobs: raw copy → normalize → dedupe into jobs + sightings → tag skills.
  * Idempotent: running it twice with the same jobs changes nothing but last_seen_at.
  */
-export async function ingest(repo: Repo, runId: string, sourceIds: Map<string, string>, skills: Skill[], jobs: RawJob[]): Promise<{ found: number; newCount: number }> {
+export async function ingest(
+  repo: Repo,
+  runId: string,
+  sourceIds: Map<string, string>,
+  skills: Skill[],
+  jobs: RawJob[],
+  userId: string | null = null,
+): Promise<{ found: number; newCount: number }> {
   let newCount = 0;
   let found = 0;
+  // ponytail: one small transaction per job, not a batched multi-row upsert — a few hundred
+  // jobs/day means a few thousand round trips, which is fine on a once-a-day Actions run.
+  // Switch to unnest()-based batch upserts (like setJobSkills) if daily volume moves into the
+  // thousands and run time starts to matter.
   for (const raw of jobs) {
     const sourceId = sourceIds.get(raw.sourceKey);
     if (!sourceId) {
@@ -37,32 +48,38 @@ export async function ingest(repo: Repo, runId: string, sourceIds: Map<string, s
     const job = normalize(raw);
     if (!job) continue;
     found++;
-    const companyId = job.companyName && job.companyNormalized ? await repo.upsertCompany(job.companyName, job.companyNormalized) : null;
-    const { id, inserted } = await repo.upsertJob(job, companyId);
+    // One job's company/job/sighting/skill writes succeed or fail together, so a crash mid-job
+    // never leaves raw_listings.job_id unlinked for a job that's missing its sighting/skills.
+    const inserted = await repo.transaction(async (tx) => {
+      const companyId = job.companyName && job.companyNormalized ? await tx.upsertCompany(job.companyName, job.companyNormalized) : null;
+      const { id, inserted } = await tx.upsertJob(job, companyId);
+      await tx.upsertSighting(id, sourceId, job.sighting.url, job.sighting.externalId, userId);
+      await tx.linkRaw(rawId, id);
+      const tags = extractSkills(`${job.title}\n${job.description ?? ''}`, skills);
+      await tx.setJobSkills(id, tags.map((s) => s.id));
+      return inserted;
+    });
     if (inserted) newCount++;
-    await repo.upsertSighting(id, sourceId, job.sighting.url, job.sighting.externalId);
-    await repo.linkRaw(rawId, id);
-    const tags = extractSkills(`${job.title}\n${job.description ?? ''}`, skills);
-    await repo.setJobSkills(id, tags.map((s) => s.id));
   }
   return { found, newCount };
 }
 
-async function runCollector(repo: Repo, collector: Collector, skills: Skill[]): Promise<RunSummary['collectors'][number]> {
+async function runCollector(repo: Repo, collector: Collector, skills: Skill[], userId: string | null = null): Promise<RunSummary['collectors'][number]> {
   const runId = await repo.startRun(collector.name);
+  const started = Date.now();
   try {
     const result = await collector.collect();
     const sourceIds = await repo.upsertSources(result.sources);
-    const { found, newCount } = await ingest(repo, runId, sourceIds, skills, result.jobs);
+    const { found, newCount } = await ingest(repo, runId, sourceIds, skills, result.jobs, userId);
     await repo.finishRun(runId, { found, newCount });
     await repo.markSources(result.sources.map((s) => s.key));
-    log.info('collector done', { collector: collector.name, found, new: newCount });
+    log.info('collector done', { collector: collector.name, runId, found, new: newCount, ms: Date.now() - started });
     return { name: collector.name, status: 'ok', found, new: newCount };
   } catch (err) {
     const error = errorMessage(err).slice(0, 1000);
     await repo.finishRun(runId, { found: 0, newCount: 0, error });
     await repo.markSources(collector.sourceKeys, error);
-    log.error('collector failed (other collectors continue)', { collector: collector.name, error });
+    log.error('collector failed (other collectors continue)', { collector: collector.name, runId, error, ms: Date.now() - started });
     return { name: collector.name, status: 'failed', found: 0, new: 0, error };
   }
 }
@@ -98,46 +115,77 @@ export async function runPipeline(config: Config, repo: Repo, opts: RunOptions =
   const summary: RunSummary = { collectors: [], users: [] };
   const skills = await repo.skills();
   const allowed = new Set(config.ALLOWED_USER_IDS);
-  const profiles = (await repo.profiles())
-    .filter((p) => allowed.size === 0 || allowed.has(p.userId))
-    .map((p) => canonicalProfile(p, skills));
+  const allProfiles = await repo.profiles();
+  const profiles = allProfiles.filter((p) => allowed.size === 0 || allowed.has(p.userId)).map((p) => canonicalProfile(p, skills));
   if (profiles.length === 0) log.warn('no profiles yet: sign in to the dashboard and fill in Settings first');
-
-  if (steps.has('collect')) {
-    const searches = await repo.searches(profiles);
-    const companies = profiles.flatMap((p) => p.targetCompanies).filter((c, i, all) => all.findIndex((x) => x.ats === c.ats && x.slug === c.slug) === i);
-    const collectors = opts.collectors ?? buildCollectors(config, { searches, companies });
-    const disabled = await repo.disabledSourceKeys();
-    for (const c of collectors) {
-      if (!c.isConfigured()) {
-        log.info('collector skipped (not configured)', { collector: c.name });
-        summary.collectors.push({ name: c.name, status: 'skipped', found: 0, new: 0 });
-        continue;
-      }
-      if (disabled.has(c.name) || (c.sourceKeys.length > 0 && c.sourceKeys.every((k) => disabled.has(k)))) {
-        summary.collectors.push({ name: c.name, status: 'skipped', found: 0, new: 0 });
-        continue;
-      }
-      summary.collectors.push(await runCollector(repo, c, skills));
-    }
+  // Without ALLOWED_USER_IDS, anyone who signs up to the dashboard gets a profile processed
+  // here and spends your AI quota. Fine with exactly one profile (you); worth a loud warning
+  // once a second profile shows up, in case sign-ups were never locked down in Supabase.
+  if (allowed.size === 0 && allProfiles.length > 1) {
+    log.warn('ALLOWED_USER_IDS is empty and more than one profile exists: anyone who signs up can spend your AI quota', {
+      profiles: allProfiles.length,
+    });
   }
 
+  const disabled = await repo.disabledSourceKeys();
+  const runAndRecord = async (c: Collector, userId: string | null = null): Promise<RunSummary['collectors'][number]> => {
+    if (!c.isConfigured()) {
+      log.info('collector skipped (not configured)', { collector: c.name, user: userId ?? undefined });
+      return { name: c.name, status: 'skipped', found: 0, new: 0 };
+    }
+    if (disabled.has(c.name) || (c.sourceKeys.length > 0 && c.sourceKeys.every((k) => disabled.has(k)))) {
+      return { name: c.name, status: 'skipped', found: 0, new: 0 };
+    }
+    return runCollector(repo, c, skills, userId);
+  };
+
+  // Tests inject a fixed collector list for the whole run via opts.collectors; real runs split
+  // into shared public sources (once, below) and personal sources (per profile, in the loop).
+  if (steps.has('collect') && opts.collectors) {
+    for (const c of opts.collectors) summary.collectors.push(await runAndRecord(c));
+  } else if (steps.has('collect')) {
+    const companies = profiles.flatMap((p) => p.targetCompanies).filter((c, i, all) => all.findIndex((x) => x.ats === c.ats && x.slug === c.slug) === i);
+    for (const c of buildCollectors(config, { companies })) summary.collectors.push(await runAndRecord(c));
+  }
+
+  const gmailSince = await repo.lastSuccessAt('gmail');
+  const personalRuns: RunSummary['collectors'] = [];
   const ai = opts.ai ?? buildRouter(config, repo);
+
   for (const profile of profiles) {
+    const secrets = await repo.secrets(profile.userId);
+
+    if (steps.has('collect') && !opts.collectors) {
+      const searches = await repo.searchesFor(profile);
+      for (const c of buildPersonalCollectors(config, secrets, searches, gmailSince)) {
+        personalRuns.push(await runAndRecord(c, profile.userId));
+      }
+    }
+
+    // Per-user Gemini/Groq key if they've brought one, falling back to the instance-wide .env
+    // key otherwise — same BYOK-or-shared-default pattern as Jooble above.
+    const profileAi =
+      opts.ai ??
+      (secrets.geminiApiKey || secrets.groqApiKey
+        ? buildRouter({ ...config, GEMINI_API_KEY: secrets.geminiApiKey ?? config.GEMINI_API_KEY, GROQ_API_KEY: secrets.groqApiKey ?? config.GROQ_API_KEY }, repo)
+        : ai);
+
     const u = { userId: profile.userId, matched: 0, passed: 0, aiScored: 0, heuristic: 0, drafted: 0, followUps: 0, digest: 'skipped' };
     const stage = async (name: Step, fn: () => Promise<void>) => {
       if (!steps.has(name)) return;
+      const started = Date.now();
       try {
         await fn();
+        log.debug('stage done', { stage: name, user: profile.userId, ms: Date.now() - started });
       } catch (err) {
-        log.error(`${name} failed for user`, { user: profile.userId, error: errorMessage(err) });
+        log.error(`${name} failed for user`, { user: profile.userId, error: errorMessage(err), ms: Date.now() - started });
       }
     };
     await stage('match', async () => {
       Object.assign(u, await matchUser(repo, profile));
     });
     await stage('score', async () => {
-      const r = await scoreJobs(repo, ai, profile);
+      const r = await scoreJobs(repo, profileAi, profile);
       u.aiScored = r.ai;
       u.heuristic = r.heuristic;
     });
@@ -145,7 +193,7 @@ export async function runPipeline(config: Config, repo: Repo, opts: RunOptions =
       u.followUps = (await repo.markFollowUpsDue(profile.userId)).length;
     });
     await stage('draft', async () => {
-      u.drafted = (await writeDrafts(repo, ai, profile, config.DRAFT_TOP_N)).jobs;
+      u.drafted = (await writeDrafts(repo, profileAi, profile, config.DRAFT_TOP_N)).jobs;
     });
     await stage('digest', async () => {
       u.digest = await sendDigest(config, repo, profile);
@@ -153,5 +201,26 @@ export async function runPipeline(config: Config, repo: Repo, opts: RunOptions =
     log.info('user done', u);
     summary.users.push(u);
   }
+
+  for (const merged of mergeCollectorSummary(personalRuns)) summary.collectors.push(merged);
   return summary;
+}
+
+/** Gmail/Jooble now run once per profile; fold those into one summary line per collector name,
+ *  the same shape a single global run used to produce (sum counts, worst status wins). */
+function mergeCollectorSummary(runs: RunSummary['collectors']): RunSummary['collectors'] {
+  const byName = new Map<string, RunSummary['collectors'][number]>();
+  const rank = { failed: 2, ok: 1, skipped: 0 } as const;
+  for (const r of runs) {
+    const existing = byName.get(r.name);
+    if (!existing) {
+      byName.set(r.name, { ...r });
+      continue;
+    }
+    existing.found += r.found;
+    existing.new += r.new;
+    if (rank[r.status] > rank[existing.status]) existing.status = r.status;
+    if (r.error) existing.error = existing.error ? `${existing.error}; ${r.error}` : r.error;
+  }
+  return [...byName.values()];
 }

@@ -46,10 +46,9 @@ export interface Collector {
   collect(): Promise<CollectorResult>;
 }
 
-/** What the pipeline needs to know about users to decide what to collect. */
+/** What the pipeline needs to know to collect from shared, public sources (ATS boards). Gmail
+ *  and Jooble are personal now — see buildPersonalCollectors, built per-user in the main loop. */
 export interface CollectContext {
-  /** Distinct keyword searches across all users (from saved_searches, else profile target titles). */
-  searches: Array<{ keywords: string; location: string }>;
   /** Distinct company boards across all users' target_companies. */
   companies: Array<{ ats: string; slug: string; name?: string }>;
 }

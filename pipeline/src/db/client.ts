@@ -8,6 +8,8 @@ import pg from 'pg';
 export interface Db {
   query<T extends pg.QueryResultRow = pg.QueryResultRow>(sql: string, params?: unknown[]): Promise<pg.QueryResult<T>>;
   close(): Promise<void>;
+  /** Runs fn against one checked-out connection inside BEGIN/COMMIT, rolling back on error. */
+  transaction<T>(fn: (db: Db) => Promise<T>): Promise<T>;
 }
 
 export function connect(databaseUrl: string): Db {
@@ -20,8 +22,24 @@ export function connect(databaseUrl: string): Db {
     // is encrypted but the certificate is not verified. Local Postgres usually has no TLS.
     ssl: local || /sslmode=/.test(databaseUrl) ? undefined : { rejectUnauthorized: false },
   });
-  return {
+  const db: Db = {
     query: (sql, params) => pool.query(sql, params as unknown[]),
     close: () => pool.end(),
+    async transaction(fn) {
+      const client = await pool.connect();
+      const txDb: Db = { query: (sql, params) => client.query(sql, params as unknown[]), close: db.close, transaction: db.transaction };
+      try {
+        await client.query('begin');
+        const result = await fn(txDb);
+        await client.query('commit');
+        return result;
+      } catch (err) {
+        await client.query('rollback');
+        throw err;
+      } finally {
+        client.release();
+      }
+    },
   };
+  return db;
 }

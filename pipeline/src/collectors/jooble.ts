@@ -1,4 +1,3 @@
-import type { Config } from '../config.js';
 import { Throttle, request } from '../lib/http.js';
 import { log } from '../lib/log.js';
 import { clean, htmlToText } from '../lib/text.js';
@@ -45,6 +44,14 @@ export function mapJoobleJob(j: JoobleJob): RawJob | null {
   };
 }
 
+export interface JoobleOptions {
+  apiKey: string;
+  host: string;
+  pages: number;
+  httpDelayMs: number;
+  httpUserAgent: string;
+}
+
 /**
  * Jooble aggregates many job boards and offers a free API key (https://jooble.org/api/about).
  * POST https://jooble.org/api/<key> with { keywords, location, page }.
@@ -55,25 +62,25 @@ export class JoobleCollector implements Collector {
   private readonly throttle: Throttle;
 
   constructor(
-    private readonly config: Config,
+    private readonly opts: JoobleOptions,
     private readonly searches: Array<{ keywords: string; location: string }>,
   ) {
-    this.throttle = new Throttle(config.HTTP_DELAY_MS);
+    this.throttle = new Throttle(opts.httpDelayMs);
   }
 
   isConfigured(): boolean {
-    return Boolean(this.config.JOOBLE_API_KEY) && this.searches.length > 0;
+    return Boolean(this.opts.apiKey) && this.searches.length > 0;
   }
 
   async collect(): Promise<CollectorResult> {
-    const url = `https://${this.config.JOOBLE_HOST}/api/${this.config.JOOBLE_API_KEY}`;
+    const url = `https://${this.opts.host}/api/${this.opts.apiKey}`;
     const jobs: RawJob[] = [];
     for (const search of this.searches) {
-      for (let page = 1; page <= this.config.JOOBLE_PAGES; page++) {
+      for (let page = 1; page <= this.opts.pages; page++) {
         await this.throttle.wait();
         const res = await request(url, {
           method: 'POST',
-          headers: { 'content-type': 'application/json', 'user-agent': this.config.HTTP_USER_AGENT },
+          headers: { 'content-type': 'application/json', 'user-agent': this.opts.httpUserAgent },
           body: JSON.stringify({ keywords: search.keywords, location: search.location, page: String(page) }),
         });
         const data = (await res.json()) as JoobleResponse;

@@ -20,7 +20,10 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Collection now runs per connected Gmail account rather than once globally, so run time
+    # scales with user count. 60 gives headroom for a handful of first-time inbox scans landing
+    # in the same run; see docs/02-architecture.md if this needs to become a matrix job later.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

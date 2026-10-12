@@ -1,5 +1,5 @@
 import { NoProviderAvailable, type AiRouter } from '../ai/index.js';
-import { ScoreSchema, scoringPrompt } from '../ai/prompts.js';
+import { profileInputHash, PROMPT_VERSION, ScoreSchema, scoringPrompt } from '../ai/prompts.js';
 import type { Repo } from '../db/repo.js';
 import { errorMessage, log } from '../lib/log.js';
 import type { Profile } from '../types.js';
@@ -11,7 +11,8 @@ import type { Profile } from '../types.js';
 export async function scoreJobs(repo: Repo, ai: AiRouter, profile: Profile, opts: { heuristicLimit?: number } = {}): Promise<{ ai: number; heuristic: number }> {
   const already = await repo.aiScoredToday(profile.userId);
   const aiBudget = Math.max(0, profile.maxAiJobsPerDay - already);
-  const candidates = await repo.toScore(profile.userId, aiBudget + (opts.heuristicLimit ?? 200));
+  const profileHash = profileInputHash(profile);
+  const candidates = await repo.toScore(profile.userId, aiBudget + (opts.heuristicLimit ?? 200), profileHash);
   let aiCount = 0;
   let heuristic = 0;
   let aiUsable = ai.hasProviders && aiBudget > 0;
@@ -25,7 +26,8 @@ export async function scoreJobs(repo: Repo, ai: AiRouter, profile: Profile, opts
           reasons: data.reasons,
           missingSkills: data.missing_skills,
           visaNote: data.visa_note ?? null,
-          model,
+          model: `${model}@${PROMPT_VERSION.score}`,
+          inputHash: profileHash,
         });
         aiCount++;
         continue;

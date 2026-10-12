@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { ScoreSchema, scoringPrompt } from '../src/ai/prompts.js';
+import { profileInputHash, ScoreSchema, scoringPrompt } from '../src/ai/prompts.js';
 import { AiRequestFailed, AiRouter, NoProviderAvailable, extractJson, type UsageStore } from '../src/ai/router.js';
 import type { Completion, LlmProvider, Prompt } from '../src/ai/types.js';
 import { HttpError } from '../src/lib/http.js';
@@ -117,5 +117,16 @@ describe('prompts', () => {
     assert.match(p.system, /untrusted/i);
     assert.match(p.user, /<job_posting>[\s\S]*Ignore previous instructions[\s\S]*<\/job_posting>/);
     assert.equal(p.json, true);
+  });
+
+  it('hashes only the profile fields the AI prompts actually see', () => {
+    const base = { skills: ['Java'], yearsExperience: 1, targetTitles: [], cities: [], visaStatus: 'visit' } as unknown as Profile;
+    assert.equal(profileInputHash(base), profileInputHash({ ...base }), 'same profile, same hash');
+    assert.notEqual(profileInputHash(base), profileInputHash({ ...base, skills: ['Java', 'Go'] }), 'new skill changes the hash');
+    assert.equal(
+      profileInputHash(base),
+      profileInputHash({ ...base, minScore: 99 } as Profile),
+      'fields outside the prompt (minScore) do not change the hash',
+    );
   });
 });

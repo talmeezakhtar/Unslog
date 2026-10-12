@@ -48,6 +48,15 @@ describe('UAE locations', () => {
     assert.equal(isUae('United Arab Emirates'), true);
     assert.equal(isUae('London, UK'), false);
   });
+
+  it('maps Arabic-script city and country names', () => {
+    assert.equal(detectCity('دبي'), 'Dubai');
+    assert.equal(detectCity('أبوظبي'), 'Abu Dhabi');
+    assert.equal(detectCity('ابو ظبي'), 'Abu Dhabi');
+    assert.equal(detectCity('الشارقة'), 'Sharjah');
+    assert.equal(detectCity('الرياض، السعودية'), null);
+    assert.equal(isUae('الإمارات العربية المتحدة'), true);
+  });
 });
 
 describe('deduplication fingerprint', () => {

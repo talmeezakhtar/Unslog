@@ -22,6 +22,16 @@ export interface Profile {
   telegramChatId: string | null;
 }
 
+/** BYOK credentials, one row per user. Any field can be null: the pipeline skips what's missing
+ *  (Gmail: no fallback, a missing token just means that user has no Gmail collector built for
+ *  them. Jooble/Gemini/Groq: callers fall back to the instance-wide .env key when absent). */
+export interface UserSecrets {
+  gmailRefreshToken: string | null;
+  joobleApiKey: string | null;
+  geminiApiKey: string | null;
+  groqApiKey: string | null;
+}
+
 /** A job as the matching stages see it. */
 export interface JobForMatching {
   id: string;

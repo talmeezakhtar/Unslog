@@ -2,7 +2,7 @@ import type { RawJob, SourceInfo } from '../collectors/types.js';
 import type { Skill } from '../stages/enrich.js';
 import type { NormalizedJob } from '../stages/normalize.js';
 import type { PrefilterResult } from '../stages/prefilter.js';
-import type { JobForMatching, Profile } from '../types.js';
+import type { JobForMatching, Profile, UserSecrets } from '../types.js';
 import type { Db } from './client.js';
 
 /**
@@ -11,6 +11,11 @@ import type { Db } from './client.js';
  */
 export class Repo {
   constructor(private readonly db: Db) {}
+
+  /** Runs fn with a Repo bound to one transactional connection; commits on success, rolls back on error. */
+  async transaction<T>(fn: (repo: Repo) => Promise<T>): Promise<T> {
+    return this.db.transaction((txDb) => fn(new Repo(txDb)));
+  }
 
   // ---------------------------------------------------------------- users
 
@@ -62,6 +67,32 @@ export class Repo {
     });
   }
 
+  /** One user's BYOK credentials, or all-null if they've never saved any. */
+  async secrets(userId: string): Promise<UserSecrets> {
+    const { rows } = await this.db.query<{ gmail_refresh_token: string | null; jooble_api_key: string | null; gemini_api_key: string | null; groq_api_key: string | null }>(
+      `select gmail_refresh_token, jooble_api_key, gemini_api_key, groq_api_key from user_secrets where user_id = $1`,
+      [userId],
+    );
+    const r = rows[0];
+    return {
+      gmailRefreshToken: r?.gmail_refresh_token ?? null,
+      joobleApiKey: r?.jooble_api_key ?? null,
+      geminiApiKey: r?.gemini_api_key ?? null,
+      groqApiKey: r?.groq_api_key ?? null,
+    };
+  }
+
+  /** One user's own Jooble searches (or their target titles, if they haven't saved any). */
+  async searchesFor(profile: Profile): Promise<Array<{ keywords: string; location: string }>> {
+    const { rows } = await this.db.query<{ keywords: string; location: string }>(
+      `select distinct lower(trim(keywords)) as keywords, location from saved_searches
+       where enabled and site = 'jooble' and trim(keywords) <> '' and user_id = $1`,
+      [profile.userId],
+    );
+    if (rows.length > 0) return rows;
+    return profile.targetTitles.map((t) => ({ keywords: t.toLowerCase().trim(), location: 'United Arab Emirates' })).filter((s) => s.keywords);
+  }
+
   async skills(): Promise<Skill[]> {
     const { rows } = await this.db.query<Skill>(`select id, name, aliases from skills`);
     return rows.map((r) => ({ ...r, aliases: (r.aliases ?? []).map((a) => a.toLowerCase()) }));
@@ -105,6 +136,15 @@ export class Repo {
       `update collector_runs set finished_at = now(), found = $2, new_count = $3, status = $4, error = $5 where id = $1`,
       [id, r.found, r.newCount, r.error ? 'failed' : 'success', r.error ?? null],
     );
+  }
+
+  /** When a collector last finished successfully, used to narrow incremental collection windows. */
+  async lastSuccessAt(collector: string): Promise<Date | null> {
+    const { rows } = await this.db.query<{ finished_at: Date | null }>(
+      `select finished_at from collector_runs where collector = $1 and status = 'success' order by finished_at desc limit 1`,
+      [collector],
+    );
+    return rows[0]?.finished_at ?? null;
   }
 
   async markSources(keys: string[], error?: string): Promise<void> {
@@ -184,11 +224,14 @@ export class Repo {
     return rows[0]!;
   }
 
-  async upsertSighting(jobId: string, sourceId: string, url: string, externalId: string): Promise<void> {
+  /** userId null for shared sources (Jooble, ATS boards); set for a job found via one person's
+   *  own Gmail alerts, so two users' sightings of the same job don't collide into one row. */
+  async upsertSighting(jobId: string, sourceId: string, url: string, externalId: string, userId: string | null = null): Promise<void> {
     await this.db.query(
-      `insert into job_sightings (job_id, source_id, url, external_id) values ($1, $2, $3, $4)
-       on conflict (job_id, source_id) do update set last_seen_at = now(), url = excluded.url`,
-      [jobId, sourceId, url, externalId],
+      `insert into job_sightings (job_id, source_id, url, external_id, user_id) values ($1, $2, $3, $4, $5)
+       on conflict (job_id, source_id, coalesce(user_id, '00000000-0000-0000-0000-000000000000'::uuid))
+       do update set last_seen_at = now(), url = excluded.url`,
+      [jobId, sourceId, url, externalId, userId],
     );
   }
 
@@ -235,8 +278,14 @@ export class Repo {
   /**
    * Passed the filter but not scored yet, best quick score first. Jobs that only got a
    * heuristic score on an earlier day come back too, so AI can score them once it's available.
+   * Jobs previously AI-scored under a different profile (new skills, CV, highlight project...)
+   * come back too, so a profile edit doesn't leave stale scores forever.
    */
-  async toScore(userId: string, limit: number): Promise<Array<JobForMatching & { matchId: string; quickScore: number; hasHeuristic: boolean }>> {
+  async toScore(
+    userId: string,
+    limit: number,
+    profileHash: string,
+  ): Promise<Array<JobForMatching & { matchId: string; quickScore: number; hasHeuristic: boolean }>> {
     const { rows } = await this.db.query(
       `select m.id as match_id, m.quick_score, (m.model = 'heuristic') as has_heuristic,
               j.id, j.title, c.name as company, j.city, j.description,
@@ -248,12 +297,14 @@ export class Repo {
        left join job_skills js on js.job_id = j.id
        left join skills s on s.id = js.skill_id
        where m.user_id = $1 and m.prefilter_passed and m.dismissed_at is null
-         and (m.scored_at is null or (m.model = 'heuristic' and m.scored_at < date_trunc('day', now())))
+         and (m.scored_at is null
+              or (m.model = 'heuristic' and m.scored_at < date_trunc('day', now()))
+              or (m.model is not null and m.model <> 'heuristic' and m.input_hash is distinct from $3))
          and j.first_seen_at >= now() - interval '14 days'
        group by m.id, j.id, c.name
        order by (m.scored_at is null) desc, m.quick_score desc nulls last, j.first_seen_at desc
        limit $2`,
-      [userId, limit],
+      [userId, limit, profileHash],
     );
     return rows.map((r) => ({
       ...toJobForMatching(r),
@@ -265,12 +316,12 @@ export class Repo {
 
   async saveScore(
     matchId: string,
-    s: { score: number; reasons: string[]; missingSkills: string[]; visaNote: string | null; model: string },
+    s: { score: number; reasons: string[]; missingSkills: string[]; visaNote: string | null; model: string; inputHash?: string | null },
   ): Promise<void> {
     await this.db.query(
-      `update job_matches set score = $2, reasons = $3, missing_skills = $4, visa_note = $5, model = $6, scored_at = now()
+      `update job_matches set score = $2, reasons = $3, missing_skills = $4, visa_note = $5, model = $6, input_hash = $7, scored_at = now()
        where id = $1`,
-      [matchId, s.score, JSON.stringify(s.reasons), s.missingSkills, s.visaNote, s.model],
+      [matchId, s.score, JSON.stringify(s.reasons), s.missingSkills, s.visaNote, s.model, s.inputHash ?? null],
     );
   }
 
@@ -309,8 +360,11 @@ export class Repo {
 
   // ---------------------------------------------------------------- drafts
 
-  /** Best scored jobs without drafts yet, that the user hasn't dismissed or closed. */
-  async toDraft(userId: string, minScore: number, limit: number): Promise<Array<JobForMatching & { score: number; reasons: string[] }>> {
+  /**
+   * Best scored jobs without drafts yet, that the user hasn't dismissed or closed. A cover note
+   * written under a now-stale profile (hash mismatch) comes back too, unless the user edited it.
+   */
+  async toDraft(userId: string, minScore: number, limit: number, profileHash: string): Promise<Array<JobForMatching & { score: number; reasons: string[] }>> {
     const { rows } = await this.db.query(
       `select j.id, j.title, c.name as company, j.city, j.description, j.experience_min, j.visa_flags,
               j.posted_at, j.first_seen_at, m.score, m.reasons,
@@ -323,22 +377,32 @@ export class Repo {
        left join applications a on a.job_id = j.id and a.user_id = m.user_id
        where m.user_id = $1 and m.score >= $2 and m.dismissed_at is null
          and (a.id is null or a.status = 'saved')
-         and not exists (select 1 from drafts d where d.user_id = m.user_id and d.job_id = j.id and d.type = 'cover_note')
+         and not exists (
+           select 1 from drafts d where d.user_id = m.user_id and d.job_id = j.id and d.type = 'cover_note'
+             and (d.edited_by_user or d.input_hash is not distinct from $4)
+         )
        group by j.id, c.name, m.score, m.reasons
        order by m.score desc
        limit $3`,
-      [userId, minScore, limit],
+      [userId, minScore, limit, profileHash],
     );
     return rows.map((r) => ({ ...toJobForMatching(r), score: r.score, reasons: r.reasons ?? [] }));
   }
 
   /** Never overwrite a draft the user edited by hand. */
-  async saveDraft(userId: string, jobId: string, type: 'cover_note' | 'outreach' | 'follow_up', content: string, model: string): Promise<void> {
+  async saveDraft(
+    userId: string,
+    jobId: string,
+    type: 'cover_note' | 'outreach' | 'follow_up',
+    content: string,
+    model: string,
+    inputHash: string | null = null,
+  ): Promise<void> {
     await this.db.query(
-      `insert into drafts (user_id, job_id, type, content, model) values ($1, $2, $3, $4, $5)
-       on conflict (user_id, job_id, type) do update set content = excluded.content, model = excluded.model
+      `insert into drafts (user_id, job_id, type, content, model, input_hash) values ($1, $2, $3, $4, $5, $6)
+       on conflict (user_id, job_id, type) do update set content = excluded.content, model = excluded.model, input_hash = excluded.input_hash
        where not drafts.edited_by_user`,
-      [userId, jobId, type, content, model],
+      [userId, jobId, type, content, model, inputHash],
     );
   }
 
