@@ -4,8 +4,8 @@ name: Daily pipeline
 
 on:
   schedule:
-    # 02:47 UTC = 06:47 in Dubai. GitHub may start scheduled jobs a few minutes late.
-    - cron: '47 2 * * *'
+    # 04:00 UTC = 08:00 in Dubai (UTC+4, no DST). GitHub may start scheduled jobs a few minutes late.
+    - cron: '0 4 * * *'
   workflow_dispatch:
     inputs:
       steps:

@@ -11,7 +11,7 @@ flowchart LR
     J[Jooble API]
     A[Company careers pages<br/>Greenhouse, Lever, Ashby, Workable, SmartRecruiters]
   end
-  subgraph GitHub Actions, daily 06:47 Dubai
+  subgraph GitHub Actions, daily 08:00 Dubai
     P[Pipeline<br/>Node.js + TypeScript]
   end
   subgraph AI free tiers
@@ -79,7 +79,7 @@ callback/
 
 ## A day in the life of one job
 
-1. **06:47.** GitHub starts `daily.yml`. The Gmail collector finds an Indeed alert email listing
+1. **08:00.** GitHub starts `daily.yml`. The Gmail collector finds an Indeed alert email listing
    "Backend Developer, Acme Technologies LLC, Dubai".
 2. The parser turns the link into a stable id (`jk=a1b2…`) and writes the untouched data to
    `raw_listings`.

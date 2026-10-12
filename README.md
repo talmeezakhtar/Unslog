@@ -32,7 +32,7 @@ Without any AI key it still works: jobs get a free heuristic score and drafts co
 - **Database and auth:** Supabase (Postgres, Row Level Security, Google sign-in)
 - **AI:** Gemini API free tier (Flash / Flash-Lite), Groq free tier as fallback
 - **Dashboard:** React 19 + Vite, hosted on Vercel
-- **Scheduling and CI:** GitHub Actions (daily run at 06:47 Dubai time, tests on every push)
+- **Scheduling and CI:** GitHub Actions (daily run at 08:00 Dubai time, tests on every push)
 
 ## Quick start
 

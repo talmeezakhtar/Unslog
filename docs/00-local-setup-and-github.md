@@ -150,7 +150,7 @@ works on a clean machine.
 
 ## 6. Pause the daily run until your keys are in
 
-The **Daily pipeline** workflow runs every morning at 06:47 Dubai time. Without your secrets it
+The **Daily pipeline** workflow runs every morning at 08:00 Dubai time. Without your secrets it
 would fail each day and email you about it. Until you finish
 [Getting started step 8](01-getting-started.md#8-schedule-the-pipeline-and-deploy-the-dashboard):
 

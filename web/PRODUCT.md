@@ -20,7 +20,7 @@ Most job-search tooling is either a job board (search, don't filter or draft) or
 
 ## Operating Context
 
-- Daily rhythm: pipeline runs every morning at a fixed time (06:47 Dubai time by default); user opens the dashboard once a day to review the digest.
+- Daily rhythm: pipeline runs every morning at a fixed time (08:00 Dubai time by default); user opens the dashboard once a day to review the digest.
 - Core workflow pages: Today (daily digest / top matches), Jobs (full list, filterable), Job detail (fit score, AI "why it fits," drafts, contacts, application tracking), Pipeline (kanban-style stage board: Saved → Applied → Follow-up due → Interview → Offer → Closed), Outreach (drafted notes awaiting send), Insights (market/skill trends, personal funnel stats), Settings (profile: skills, target titles, cities, visa status, experience, sources, AI/digest config).
 - Sign-in is required for every page except Sign In itself; without a session the user sees only the sign-in screen.
 - Without any sources or AI keys configured, the product still runs: filtering uses free heuristic rules and drafts fall back to templates.

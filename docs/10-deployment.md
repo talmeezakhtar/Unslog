@@ -13,7 +13,7 @@ This page covers running it day to day.
 
 ## The daily run
 
-- Schedule: `47 2 * * *` UTC (06:47 Dubai) in `.github/workflows/daily.yml`. GitHub can start
+- Schedule: `0 4 * * *` UTC (08:00 Dubai) in `.github/workflows/daily.yml`. GitHub can start
   scheduled jobs a few minutes late, and pauses schedules on repositories with no activity for
   60 days. Push anything (or re-enable the workflow) to resume.
 - Manual run: Actions → Daily pipeline → Run workflow (optionally with steps).

@@ -190,7 +190,7 @@ GitHub installs exactly the same versions.
 | `APP_URL` | Variable | Your dashboard URL (for links in the digest) |
 | `ALLOWED_USER_IDS` | Variable | Your Supabase user id (comma-separate several) |
 
-The **Daily pipeline** workflow (`.github/workflows/daily.yml`) then runs at 06:47 Dubai time.
+The **Daily pipeline** workflow (`.github/workflows/daily.yml`) then runs at 08:00 Dubai time.
 To run it now: Actions → Daily pipeline → Run workflow. To run only some steps, type them in
 the box, e.g. `match,score,draft`.
 

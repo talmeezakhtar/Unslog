@@ -34,7 +34,7 @@ Use this page to prepare for system design questions: every answer has a real ex
 | **Circuit breaker** | Don't keep calling a provider that is failing | After a 429/401/403 or 3 failures in a row, the provider is skipped for the rest of the run |
 | **Graceful degradation** | No AI at all should still give a usable result | Heuristic scores and template drafts (`stages/score.ts`, `stages/draft.ts`) |
 | **Failure isolation** | One broken source shouldn't stop the run | `runCollector` catches per collector; `stage()` wraps each per-user stage in `run.ts` |
-| **Observability** | Know what happened at 06:47 | `collector_runs`, `sources.last_error`, `ai_usage`, one-line structured logs (`lib/log.ts`) |
+| **Observability** | Know what happened at 08:00 | `collector_runs`, `sources.last_error`, `ai_usage`, one-line structured logs (`lib/log.ts`) |
 
 ## Cost and scale
 
