@@ -21,16 +21,26 @@ LinkedIn note for each, and reminds you to follow up. You review and send everyt
 | Score | Gemini (Groq as fallback) rates fit 0 to 100 with reasons, within free daily limits | `pipeline/src/stages/score.ts` |
 | Draft | Cover note, outreach note and follow-up message for the top jobs | `pipeline/src/stages/draft.ts` |
 | Remind | Applications quiet for 6+ days move to "Follow-up due" | `supabase/migrations/` (trigger) + `pipeline/src/run.ts` |
-| Digest | A morning message on Telegram or email | `pipeline/src/stages/digest.ts` |
+| Digest | A morning message on Telegram, or none | `pipeline/src/stages/digest.ts` |
 | Dashboard | Today, Jobs, Job detail, Pipeline, Outreach, Insights, Settings | `web/src/pages/` |
 
 Without any AI key it still works: jobs get a free heuristic score and drafts come from templates.
 
+## Sharing it with other people
+
+Unslog started as a single-user tool and now runs multi-tenant: anyone who signs in (magic-link
+email by default; Gmail OAuth too, capped to approved testers while that stays in Google's
+unpublished Testing mode) gets their own onboarding flow, profile and job feed, isolated by
+Supabase Row Level Security. Each user can add their own Gmail and AI keys in Settings
+("Connections") instead of using the shared ones; secrets are encrypted at rest with pgcrypto.
+Set `ALLOWED_USER_IDS` to restrict who can sign in, and `SHARED_AI_MAX_JOBS_PER_USER_PER_DAY` to
+cap how much of the shared Gemini/Groq quota each signed-up user can use.
+
 ## Tech stack
 
 - **Pipeline:** Node.js 22 + TypeScript, plain SQL with `pg`, Zod for validation, htmlparser2 for emails
-- **Database and auth:** Supabase (Postgres, Row Level Security, Google sign-in)
-- **AI:** Gemini API free tier (Flash / Flash-Lite), Groq free tier as fallback
+- **Database and auth:** Supabase (Postgres, Row Level Security, magic-link + Google sign-in, secrets encrypted at rest with pgcrypto)
+- **AI:** Gemini API free tier (Flash / Flash-Lite), Groq free tier as fallback, or bring your own key
 - **Dashboard:** React 19 + Vite, hosted on Vercel
 - **Scheduling and CI:** GitHub Actions (daily run at 08:00 Dubai time, tests on every push)
 
@@ -69,9 +79,13 @@ The full walkthrough, including Gmail, Jooble, Telegram and deployment, is in
 
 ## Screens
 
-| Job detail | Insights |
+| Job detail | Pipeline |
 | --- | --- |
-| ![Job detail](docs/images/job-detail.png) | ![Insights](docs/images/insights.png) |
+| ![Job detail](docs/images/job-detail.png) | ![Pipeline](docs/images/pipeline.png) |
+
+| Insights |
+| --- |
+| ![Insights](docs/images/insights.png) |
 
 Screens show sample data.
 
