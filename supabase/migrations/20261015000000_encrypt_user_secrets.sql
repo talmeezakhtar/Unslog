@@ -49,10 +49,15 @@ alter table user_secrets rename column groq_api_key_enc        to groq_api_key;
 -- All reads and writes go through the functions below instead.
 drop policy "own secrets" on user_secrets;
 
+-- search_path includes extensions: Supabase installs pgcrypto there, not public (vanilla
+-- Postgres in tests puts it in public instead, and a nonexistent schema on the path is a
+-- harmless no-op, so this works in both). Still narrow and still safe: authenticated/anon can't
+-- create objects in extensions, so it doesn't reopen a search-path-hijacking hole.
+
 -- Captured once, right after Google OAuth, same as before — just encrypts before storing.
 -- Never paired with a getter: the dashboard must not be able to read this back.
 create or replace function set_gmail_refresh_token(token text) returns void
-language sql security definer set search_path = public as $$
+language sql security definer set search_path = public, extensions as $$
   insert into user_secrets (user_id, gmail_refresh_token)
   values (auth.uid(), pgp_sym_encrypt(token, (select value from app_secrets where key = 'user_secrets_key')))
   on conflict (user_id) do update set gmail_refresh_token = excluded.gmail_refresh_token;
@@ -62,7 +67,7 @@ $$;
 -- they're just encrypted in storage now instead of sitting there in the clear.
 create or replace function get_byok_secrets()
 returns table (jooble_api_key text, gemini_api_key text, groq_api_key text)
-language sql security definer set search_path = public as $$
+language sql security definer set search_path = public, extensions as $$
   select
     case when jooble_api_key is null then null else pgp_sym_decrypt(jooble_api_key, (select value from app_secrets where key = 'user_secrets_key')) end,
     case when gemini_api_key is null then null else pgp_sym_decrypt(gemini_api_key, (select value from app_secrets where key = 'user_secrets_key')) end,
@@ -71,7 +76,7 @@ language sql security definer set search_path = public as $$
 $$;
 
 create or replace function set_byok_secrets(jooble text, gemini text, groq text) returns void
-language sql security definer set search_path = public as $$
+language sql security definer set search_path = public, extensions as $$
   insert into user_secrets (user_id, jooble_api_key, gemini_api_key, groq_api_key)
   values (
     auth.uid(),
