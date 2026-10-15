@@ -286,6 +286,36 @@ describe('pipeline end to end (real Postgres)', { skip: !TEST_DATABASE_URL && 's
       // Writing someone else's row is refused.
       await assert.rejects(as(otherUserId, `insert into contacts (user_id, name) values ($1, 'x')`, [userId]), /row-level security/);
 
+      // user_secrets has no policy of its own any more: reads and writes only work through
+      // the functions below, even for the row's own owner.
+      assert.equal((await as(userId, `select count(*)::int as n from user_secrets`)).rows[0]!.n, 0);
+
+      // BYOK keys and the Gmail token round-trip through the encrypting functions. One
+      // transaction (not the as() helper, which rolls back) so the writes stick around to check.
+      await client.query('begin');
+      try {
+        await client.query('set local role authenticated');
+        await client.query(`select set_config('request.jwt.claim.sub', $1, true)`, [userId]);
+        await client.query(`select set_byok_secrets($1, $2, $3)`, ['jooble-key', 'gemini-key', null]);
+        await client.query(`select set_gmail_refresh_token($1)`, ['refresh-token-xyz']);
+        const byok = (await client.query(`select * from get_byok_secrets()`)).rows[0]!;
+        assert.deepEqual(byok, { jooble_api_key: 'jooble-key', gemini_api_key: 'gemini-key', groq_api_key: null });
+        await client.query('commit');
+      } catch (err) {
+        await client.query('rollback');
+        throw err;
+      }
+
+      // Stored encrypted, not in the clear — checked as the table owner, same access raw SQL would have.
+      const raw = (await db.query(`select jooble_api_key, gmail_refresh_token from user_secrets where user_id = $1`, [userId])).rows[0]!;
+      assert.notEqual(raw.jooble_api_key.toString(), 'jooble-key');
+      assert.notEqual(raw.gmail_refresh_token.toString(), 'refresh-token-xyz');
+
+      // The pipeline (direct connection, same role that owns the key) decrypts them for real use.
+      const pipelineSecrets = await repo.secrets(userId);
+      assert.equal(pipelineSecrets.joobleApiKey, 'jooble-key');
+      assert.equal(pipelineSecrets.gmailRefreshToken, 'refresh-token-xyz');
+
       // Dashboard functions work for the signed-in user.
       const today = await as(userId, `select today_summary() as s`);
       assert.equal(typeof today.rows[0]!.s.new_jobs_today, 'number');

@@ -59,5 +59,6 @@ export function modelLabel(model: string | null): string {
   if (!model) return '';
   if (model === 'heuristic') return 'Quick score (no AI)';
   if (model === 'template') return 'Template';
-  return model.split('/').pop() ?? model;
+  // Stored as "provider/model@prompt-version"; show just the model name.
+  return model.split('/').pop()?.split('@')[0] || model;
 }

@@ -67,10 +67,17 @@ export class Repo {
     });
   }
 
-  /** One user's BYOK credentials, or all-null if they've never saved any. */
+  /** One user's BYOK credentials, or all-null if they've never saved any. Columns are
+   *  pgp_sym_encrypt'd (see the encrypt_user_secrets migration); the pipeline connects as the
+   *  table owner, so it decrypts with the same key the SECURITY DEFINER functions use. */
   async secrets(userId: string): Promise<UserSecrets> {
     const { rows } = await this.db.query<{ gmail_refresh_token: string | null; jooble_api_key: string | null; gemini_api_key: string | null; groq_api_key: string | null }>(
-      `select gmail_refresh_token, jooble_api_key, gemini_api_key, groq_api_key from user_secrets where user_id = $1`,
+      `select
+         case when gmail_refresh_token is null then null else pgp_sym_decrypt(gmail_refresh_token, (select value from app_secrets where key = 'user_secrets_key')) end as gmail_refresh_token,
+         case when jooble_api_key      is null then null else pgp_sym_decrypt(jooble_api_key,      (select value from app_secrets where key = 'user_secrets_key')) end as jooble_api_key,
+         case when gemini_api_key      is null then null else pgp_sym_decrypt(gemini_api_key,      (select value from app_secrets where key = 'user_secrets_key')) end as gemini_api_key,
+         case when groq_api_key        is null then null else pgp_sym_decrypt(groq_api_key,        (select value from app_secrets where key = 'user_secrets_key')) end as groq_api_key
+       from user_secrets where user_id = $1`,
       [userId],
     );
     const r = rows[0];

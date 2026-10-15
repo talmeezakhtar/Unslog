@@ -42,17 +42,17 @@ export function HBarChart({
   const max = Math.max(1, ...rows.map((r) => r.value));
   const barW = width - labelW - 56;
   return (
-    <figure className="chart" aria-label={label} style={{ margin: 0 }} onMouseLeave={() => setTip(null)}>
+    <figure className="chart chart-h" aria-label={label} style={{ margin: 0 }} onMouseLeave={() => setTip(null)}>
       <svg viewBox={`0 0 ${width} ${rows.length * rowH}`} role="img" aria-label={label}>
         {rows.map((r, i) => {
           const w = Math.max(2, (r.value / max) * barW);
           const y = i * rowH;
           return (
             <g key={r.label}>
-              <text x={labelW - 10} y={y + rowH / 2 + 4} textAnchor="end">
+              <text className="cat" x={labelW - 10} y={y + rowH / 2 + 4} textAnchor="end">
                 {r.label.length > 22 ? `${r.label.slice(0, 21)}…` : r.label}
               </text>
-              <path className={`bar ${highlight?.(r.label) ? 'is-mine' : ''}`} d={roundedRight(labelW, y + 6, w, rowH - 12, 4)} />
+              <path className={`bar ${highlight?.(r.label) ? 'is-mine' : ''}`} d={roundedRight(labelW, y + 6, w, rowH - 12, 4)} style={{ animationDelay: `${Math.min(i, 12) * 25}ms` }} />
               <text className="value" x={labelW + w + 8} y={y + rowH / 2 + 4}>
                 {format(r.value)}
               </text>
@@ -83,12 +83,12 @@ export function ColumnChart({ rows, label, format = (n) => String(n), width = 64
   const ticks = niceTicks(max);
   const y = (v: number) => (height - bottom) * (1 - v / ticks[ticks.length - 1]!);
   return (
-    <figure className="chart" style={{ margin: 0 }} onMouseLeave={() => setTip(null)}>
+    <figure className="chart chart-col" style={{ margin: 0 }} onMouseLeave={() => setTip(null)}>
       <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={label}>
         {ticks.map((t) => (
           <g key={t}>
             <line className="grid" x1={28} x2={width} y1={y(t)} y2={y(t)} />
-            <text x={0} y={y(t) + 4}>
+            <text className="value" x={0} y={y(t) + 4}>
               {t}
             </text>
           </g>
@@ -98,9 +98,9 @@ export function ColumnChart({ rows, label, format = (n) => String(n), width = 64
           const top = y(r.value);
           return (
             <g key={r.label}>
-              <path className="bar" d={roundedTop(x, top, barW, height - bottom - top, 4)} />
+              <path className="bar" d={roundedTop(x, top, barW, height - bottom - top, 4)} style={{ animationDelay: `${Math.min(i, 12) * 25}ms` }} />
               {(i === 0 || i === rows.length - 1 || rows.length <= 8) && (
-                <text x={x + barW / 2} y={height - 6} textAnchor="middle">
+                <text className="cat" x={x + barW / 2} y={height - 6} textAnchor="middle">
                   {r.label}
                 </text>
               )}
@@ -124,14 +124,14 @@ export function RangeChart({ rows, label, format, width = 640 }: { rows: Array<{
   const pad = (hi - lo) * 0.08 || 1000;
   const x = (v: number) => labelW + ((v - (lo - pad)) / (hi - lo + 2 * pad)) * (width - labelW - 20);
   return (
-    <figure className="chart" style={{ margin: 0 }} onMouseLeave={() => setTip(null)}>
+    <figure className="chart chart-range" style={{ margin: 0 }} onMouseLeave={() => setTip(null)}>
       <svg viewBox={`0 0 ${width} ${rows.length * rowH + 20}`} role="img" aria-label={label}>
         {rows.map((r, i) => {
           const cy = i * rowH + rowH / 2;
           const mid = (r.low + r.high) / 2;
           return (
-            <g key={r.label}>
-              <text x={labelW - 10} y={cy + 4} textAnchor="end">
+            <g key={r.label} style={{ animationDelay: `${Math.min(i, 12) * 25}ms` }}>
+              <text className="cat" x={labelW - 10} y={cy + 4} textAnchor="end">
                 {r.label.length > 24 ? `${r.label.slice(0, 23)}…` : r.label}
               </text>
               <line className="whisker" x1={x(r.low)} x2={x(r.high)} y1={cy} y2={cy} />
@@ -142,10 +142,10 @@ export function RangeChart({ rows, label, format, width = 640 }: { rows: Array<{
             </g>
           );
         })}
-        <text x={labelW} y={rows.length * rowH + 16}>
+        <text className="value" x={labelW} y={rows.length * rowH + 16}>
           {format(lo)}
         </text>
-        <text x={width - 20} y={rows.length * rowH + 16} textAnchor="end">
+        <text className="value" x={width - 20} y={rows.length * rowH + 16} textAnchor="end">
           {format(hi)}
         </text>
       </svg>

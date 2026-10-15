@@ -1,3 +1,4 @@
+import type { Session } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import type {
   Application,
@@ -12,6 +13,7 @@ import type {
   OutreachChannel,
   Profile,
   SavedSearch,
+  Secrets,
   TodaySummary,
 } from './types';
 
@@ -270,6 +272,40 @@ export async function profile(): Promise<Profile | null> {
 export async function saveProfile(p: Omit<Profile, 'user_id'>): Promise<void> {
   const user_id = await currentUserId();
   unwrap(await supabase.from('profiles').upsert({ ...p, user_id }));
+}
+
+/** BYOK keys only — never returns gmail_refresh_token (write-only, see Secrets). Reads and
+ *  writes go through functions, not the table directly: user_secrets stores these encrypted,
+ *  and only the functions hold the key (see the encrypt_user_secrets migration). */
+export async function secrets(): Promise<Secrets | null> {
+  return unwrap(await supabase.rpc('get_byok_secrets').maybeSingle()) as Secrets | null;
+}
+
+export async function saveSecrets(s: Secrets): Promise<void> {
+  unwrap(await supabase.rpc('set_byok_secrets', { jooble: s.jooble_api_key, gemini: s.gemini_api_key, groq: s.groq_api_key }));
+}
+
+/**
+ * Supabase only hands back provider_refresh_token once, in the session right after OAuth
+ * completes — it isn't persisted anywhere, so this must run immediately on sign-in or the token
+ * is gone until the next consent screen. Call from App.tsx's onAuthStateChange.
+ */
+export async function captureGmailConnection(session: Session): Promise<void> {
+  const token = session.provider_refresh_token;
+  if (!token) return;
+  const user_id = session.user.id;
+  unwrap(await supabase.rpc('set_gmail_refresh_token', { token }));
+  // Upsert, not update: a brand-new user has no profiles row yet (created on first Settings
+  // save), and an update against a missing row would silently do nothing.
+  unwrap(await supabase.from('profiles').upsert({ user_id, gmail_connected: true }));
+}
+
+/** Leaves the admin a note to add this Google account as a test user (see Connections in
+ *  Settings) — there's no callback to hook when Google blocks an unapproved sign-in, so this is
+ *  the only way the admin finds out who's waiting. */
+export async function requestGmailAccess(email: string): Promise<void> {
+  const user_id = await currentUserId();
+  unwrap(await supabase.from('gmail_access_requests').upsert({ user_id, email, requested_at: new Date().toISOString() }));
 }
 
 export async function savedSearches(): Promise<SavedSearch[]> {

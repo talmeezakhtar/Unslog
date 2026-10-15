@@ -1,6 +1,6 @@
 # System design concepts
 
-Each concept below names the problem it solves in Callback and the code where you can see it.
+Each concept below names the problem it solves in Unslog and the code where you can see it.
 Use this page to prepare for system design questions: every answer has a real example behind it.
 
 ## Data collection
@@ -70,7 +70,7 @@ Use this page to prepare for system design questions: every answer has a real ex
 
 ## How it would scale (interview follow-up)
 
-Today: one scheduled job, one database, a few hundred jobs a day. If Callback had thousands of users:
+Today: one scheduled job, one database, a few hundred jobs a day. If Unslog had thousands of users:
 
 1. **Collect once, match per user.** Already the shape: jobs are shared, matches are per user.
 2. **Queue the per-user work.** Collect in one job, then put "score user X" tasks on a queue

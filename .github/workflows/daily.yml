@@ -4,8 +4,10 @@ name: Daily pipeline
 
 on:
   schedule:
-    # 04:00 UTC = 08:00 in Dubai (UTC+4, no DST). GitHub may start scheduled jobs a few minutes late.
-    - cron: '0 4 * * *'
+    # 04:13 UTC = ~08:13 in Dubai (UTC+4, no DST). Offset off the hour on purpose: GitHub
+    # deprioritizes scheduled runs during load spikes at the top of every hour, so an odd
+    # minute reduces (but doesn't eliminate) delay. Scheduled runs are best-effort, not exact.
+    - cron: '13 4 * * *'
   workflow_dispatch:
     inputs:
       steps:

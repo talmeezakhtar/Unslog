@@ -5,7 +5,7 @@ framework to install.
 
 ```bash
 npm test                                   # unit tests; database tests are skipped
-TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/callback_test npm test   # everything
+TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/unslog_test npm test   # everything
 npm run typecheck                          # pipeline + web
 ```
 
@@ -13,7 +13,7 @@ The database tests wipe and rebuild the database they're given, so the URL must 
 Use a throwaway local Postgres:
 
 ```bash
-docker run --rm -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=callback_test postgres:16
+docker run --rm -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=unslog_test postgres:16
 ```
 
 ## What's covered

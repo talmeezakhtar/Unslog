@@ -1,6 +1,6 @@
 # Learning guide
 
-Callback was built to be used every morning and to be learned from. This guide maps the code to
+Unslog was built to be used every morning and to be learned from. This guide maps the code to
 the skills it teaches, in the order to read it, with exercises and interview talking points.
 
 ## Reading order

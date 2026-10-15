@@ -10,7 +10,8 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "noEmit": true,
-    "types": []
+    "types": [],
+    "paths": { "@/*": ["./src/*"] }
   },
   "include": ["src"]
 }

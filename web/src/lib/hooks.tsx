@@ -1,4 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { Toast as ToastPrimitive } from 'radix-ui';
+import { ToastItem, ToastViewport, type ToastVariant } from '../components/ui/toast';
 
 /** Load data for a page. `reload()` refetches after an action changes something. */
 export function useAsync<T>(fn: () => Promise<T>, deps: unknown[] = []) {
@@ -24,23 +26,36 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[] = []) {
   return { ...state, reload };
 }
 
-const ToastContext = createContext<(msg: string) => void>(() => {});
+export type ToastInput = string | { title: string; description?: string; variant?: ToastVariant };
+interface ToastState { id: number; title: string; description?: string; variant: ToastVariant; open: boolean }
 
-/** Short confirmation messages ("Marked as applied"). Announced to screen readers. */
+const ToastContext = createContext<(input: ToastInput) => void>(() => {});
+
+/** Stacked, dismissible confirmations ("Marked as applied") with success/error/warning/info styling. */
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const [msg, setMsg] = useState<string | null>(null);
-  const timer = useRef<number | undefined>(undefined);
-  const show = useCallback((m: string) => {
-    setMsg(m);
-    window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setMsg(null), 2600);
+  const [items, setItems] = useState<ToastState[]>([]);
+  const idRef = useRef(0);
+
+  const show = useCallback((input: ToastInput) => {
+    const opts = typeof input === 'string' ? { title: input } : input;
+    const id = ++idRef.current;
+    setItems((xs) => [...xs, { id, variant: 'success', ...opts, open: true }]);
   }, []);
+
+  const close = useCallback((id: number) => {
+    setItems((xs) => xs.map((x) => (x.id === id ? { ...x, open: false } : x)));
+    window.setTimeout(() => setItems((xs) => xs.filter((x) => x.id !== id)), 200);
+  }, []);
+
   return (
     <ToastContext.Provider value={show}>
-      {children}
-      <div role="status" aria-live="polite">
-        {msg && <div className="toast">{msg}</div>}
-      </div>
+      <ToastPrimitive.Provider swipeDirection="right">
+        {children}
+        {items.map((item) => (
+          <ToastItem key={item.id} {...item} onClose={() => close(item.id)} />
+        ))}
+        <ToastViewport />
+      </ToastPrimitive.Provider>
     </ToastContext.Provider>
   );
 }

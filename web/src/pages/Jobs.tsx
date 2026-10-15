@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { jobFeed, setDismissed, type JobFilters } from '../lib/api';
 import { useAction, useAsync } from '../lib/hooks';
 import { Empty, ErrorBox, JobRow, Loading } from '../components/ui';
+import { Modal } from '../components/ui/modal';
+import { JobDetail } from './JobDetail';
 
 const CITIES = ['Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Ras Al Khaimah', 'Al Ain'];
 const PAGE = 20;
@@ -17,9 +19,15 @@ export function Jobs() {
 
   const feed = useAsync(() => jobFeed(f), [JSON.stringify(f)]);
   const act = useAction();
+  const [reviewId, setReviewId] = useState<string | null>(null);
+  const closeReview = () => {
+    setReviewId(null);
+    feed.reload();
+  };
   const set = (patch: Partial<JobFilters>) => setF((x) => ({ ...x, ...patch, page: 0 }));
   const total = feed.data?.total ?? 0;
   const pages = Math.max(1, Math.ceil(total / PAGE));
+  const reviewTitle = feed.data?.rows.find((m) => m.job.id === reviewId)?.job.title ?? 'Job details';
 
   return (
     <>
@@ -86,6 +94,7 @@ export function Jobs() {
               <li key={m.id}>
                 <JobRow
                   match={m}
+                  onReview={() => setReviewId(m.job.id)}
                   action={
                     <button
                       className="btn btn-small"
@@ -118,6 +127,10 @@ export function Jobs() {
           </div>
         </nav>
       )}
+
+      <Modal open={reviewId !== null} onClose={closeReview} title={reviewTitle}>
+        {reviewId && <JobDetail id={reviewId} onClose={closeReview} />}
+      </Modal>
     </>
   );
 }

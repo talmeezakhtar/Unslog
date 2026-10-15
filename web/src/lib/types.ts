@@ -122,6 +122,15 @@ export interface Profile {
   digest_channel: 'none' | 'telegram' | 'email';
   digest_email: string | null;
   telegram_chat_id: string | null;
+  gmail_connected: boolean;
+}
+
+/** BYOK integrations. gmail_refresh_token is write-only from the client: captured once right
+ *  after OAuth consent, never read back into a form. */
+export interface Secrets {
+  jooble_api_key: string | null;
+  gemini_api_key: string | null;
+  groq_api_key: string | null;
 }
 
 export interface SavedSearch {

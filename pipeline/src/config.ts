@@ -41,7 +41,13 @@ const schema = z.object({
 
   DRAFT_TOP_N: int(10),
   DIGEST_TOP_N: int(10),
-  HTTP_USER_AGENT: z.string().default('CallbackJobCopilot/0.1 (personal job search tool)'),
+  /** Per-user ceiling on AI scoring calls against the shared Gemini/Groq key, separate from (and
+   *  usually smaller than) a profile's own max_ai_jobs_per_day. Without it, one signed-up user
+   *  could set their own cap to 500 and burn the whole shared daily quota alone, leaving nothing
+   *  for anyone else that day — including you. Only applies when the user hasn't brought their
+   *  own Gemini/Groq key; BYOK users spend their own quota and aren't capped by this. */
+  SHARED_AI_MAX_JOBS_PER_USER_PER_DAY: int(20),
+  HTTP_USER_AGENT: z.string().default('UnslogJobCopilot/0.1 (personal job search tool)'),
   HTTP_DELAY_MS: int(1500),
   /** Comma-separated user ids the pipeline serves. Empty = everyone with a profile. */
   ALLOWED_USER_IDS: optional.transform((v) => (v ? v.split(',').map((s) => s.trim()).filter(Boolean) : [])),

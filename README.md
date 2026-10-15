@@ -1,6 +1,6 @@
-# Callback
+# Unslog
 
-**A free job-hunt copilot for the UAE.** Every morning Callback collects new jobs from your
+**A free job-hunt copilot for the UAE.** Every morning Unslog collects new jobs from your
 job-alert emails, a job-search API and company careers pages, removes duplicates, filters them
 against your profile, scores the best ones with a free AI model, drafts a cover note and a
 LinkedIn note for each, and reminds you to follow up. You review and send everything yourself.
@@ -37,7 +37,7 @@ Without any AI key it still works: jobs get a free heuristic score and drafts co
 ## Quick start
 
 ```bash
-git clone https://github.com/<you>/callback.git && cd callback
+git clone https://github.com/<you>/unslog.git && cd unslog
 npm install
 cp .env.example .env            # fill in DATABASE_URL and the Supabase keys at least
 npm run db:migrate              # creates the tables in your Supabase project
@@ -77,7 +77,7 @@ Screens show sample data.
 
 ## Responsible use
 
-Callback reads job-alert emails that sites send you, uses Jooble's official API, and reads
+Unslog reads job-alert emails that sites send you, uses Jooble's official API, and reads
 job lists that companies publish for anyone to read. It does not scrape job boards, log in to
 your accounts or apply on your behalf. Read each source's terms before adding new ones.
 

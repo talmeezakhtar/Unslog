@@ -24,14 +24,14 @@ const DRAFT_TABS: Array<{ type: DraftType; label: string; hint: string }> = [
   { type: 'follow_up', label: 'Follow-up', hint: 'For when an application goes quiet' },
 ];
 
-export function JobDetail({ id }: { id: string }) {
+export function JobDetail({ id, onClose }: { id: string; onClose?: () => void }) {
   const d = useAsync(() => jobDetail(id), [id]);
   if (d.loading) return <Loading rows={5} />;
   if (d.error || !d.data) return <ErrorBox error={d.error ?? 'Job not found'} />;
-  return <DetailView d={d.data} reload={d.reload} />;
+  return <DetailView d={d.data} reload={d.reload} showBackLink={!onClose} />;
 }
 
-function DetailView({ d, reload }: { d: Detail; reload: () => void }) {
+function DetailView({ d, reload, showBackLink }: { d: Detail; reload: () => void; showBackLink: boolean }) {
   const act = useAction();
   const { job, match, application } = d;
   const sources = job.sightings ?? [];
@@ -39,9 +39,11 @@ function DetailView({ d, reload }: { d: Detail; reload: () => void }) {
 
   return (
     <>
-      <Link to="/jobs" className="small">
-        Back to jobs
-      </Link>
+      {showBackLink && (
+        <Link to="/jobs" className="small">
+          Back to jobs
+        </Link>
+      )}
 
       <section className="panel" aria-labelledby="job-h">
         <div className="job-row" style={{ alignItems: 'flex-start' }}>

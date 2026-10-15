@@ -1,8 +1,8 @@
 {
-  "name": "callback",
+  "name": "unslog",
   "version": "0.1.0",
   "private": true,
-  "description": "Callback: a free job-hunt copilot for the UAE. Finds jobs every morning, ranks them against your profile, drafts applications and outreach, and tracks follow-ups.",
+  "description": "Unslog: a free job-hunt copilot for the UAE. Finds jobs every morning, ranks them against your profile, drafts applications and outreach, and tracks follow-ups.",
   "license": "MIT",
   "workspaces": [
     "pipeline",

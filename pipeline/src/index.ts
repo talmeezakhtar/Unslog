@@ -5,7 +5,7 @@ import { Repo } from './db/repo.js';
 import { errorMessage, log } from './lib/log.js';
 import { STEPS, runPipeline, type Step } from './run.js';
 
-const HELP = `Callback pipeline
+const HELP = `Unslog pipeline
 
 Usage:
   npm run pipeline -- run                       Run every step (what the daily schedule does)

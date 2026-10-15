@@ -1,6 +1,6 @@
 # Getting started
 
-This guide takes you from nothing to a working Callback: a dashboard you can sign in to and a
+This guide takes you from nothing to a working Unslog: a dashboard you can sign in to and a
 pipeline that runs every morning. Everything uses free tiers. Budget about an hour.
 
 Only steps 1–3 are required. Each later step switches on one more source or feature, and the
@@ -45,8 +45,8 @@ GitHub repository? Do [Local setup and GitHub](00-local-setup-and-github.md) fir
 ## 2. Install and create the tables
 
 ```bash
-git clone https://github.com/<you>/callback.git
-cd callback
+git clone https://github.com/<you>/unslog.git
+cd unslog
 npm install
 cp .env.example .env
 ```
@@ -89,7 +89,7 @@ That's expected. The next steps add sources.
 
 ## 4. Gmail job alerts (Indeed, LinkedIn, Bayt, Naukrigulf)
 
-Callback reads the job-alert emails these sites already send you.
+Unslog reads the job-alert emails these sites already send you.
 
 **4a. Create alerts on the sites.** Make several, one per title × site:
 "Node.js developer", "backend developer", "Java developer", "full stack developer"… in Dubai or
@@ -135,7 +135,7 @@ This shows the jobs found in your five newest alert emails and saves those email
 
 1. Request a free key at <https://jooble.org/api/about>.
 2. Put it in `.env` as `JOOBLE_API_KEY`.
-3. Optional: add keyword searches in Settings → Jooble searches. Without any, Callback searches
+3. Optional: add keyword searches in Settings → Jooble searches. Without any, Unslog searches
    your target job titles across the UAE.
 
 If results are not UAE-focused, check whether your key's welcome email names a country-specific
@@ -214,7 +214,7 @@ arrives. Your part is about 20 minutes on the Today page.
 | Gmail collector fails with `invalid_grant` | Refresh token expired (Testing mode) or revoked: publish the consent screen and rerun `npm run gmail:auth` |
 | Gmail runs but finds 0 jobs | Run `npm run gmail:sample`; tune the parser (docs/04-pipeline.md) |
 | AI calls fail with 404 | Model name retired: set `GEMINI_SCORE_MODEL` / `GEMINI_DRAFT_MODEL` |
-| AI calls fail with 429 | Free daily limit reached: Callback switches to Groq, then heuristic scores. Lower "AI-scored jobs per day" in Settings |
+| AI calls fail with 429 | Free daily limit reached: Unslog switches to Groq, then heuristic scores. Lower "AI-scored jobs per day" in Settings |
 | Dashboard shows "Supabase isn't connected yet" | `VITE_SUPABASE_*` missing; restart `npm run dev` after editing `.env` |
 | Sign-in link opens the wrong site | Site URL / Redirect URLs in Supabase Authentication settings |
 | Today is empty after a run | Profile missing or rules too strict: in Jobs, tick "Include jobs your rules filtered out" to see the reasons |

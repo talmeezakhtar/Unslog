@@ -1,5 +1,5 @@
 {
-  "name": "@callback/pipeline",
+  "name": "@unslog/pipeline",
   "version": "0.1.0",
   "private": true,
   "type": "module",

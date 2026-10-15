@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { addSavedSearch, profile, removeSavedSearch, saveProfile, savedSearches, sources } from '../lib/api';
+import { addSavedSearch, profile, removeSavedSearch, requestGmailAccess, saveProfile, savedSearches, saveSecrets, secrets, sources } from '../lib/api';
 import { ago } from '../lib/format';
 import { useAction, useAsync } from '../lib/hooks';
-import type { Profile, TargetCompany } from '../lib/types';
+import { signInWithGmail } from '../lib/supabase';
+import type { Profile, Secrets, TargetCompany } from '../lib/types';
 import { ChipInput, ErrorBox, Loading } from '../components/ui';
 
 const EMPTY: Omit<Profile, 'user_id'> = {
@@ -24,7 +25,10 @@ const EMPTY: Omit<Profile, 'user_id'> = {
   digest_channel: 'none',
   digest_email: '',
   telegram_chat_id: '',
+  gmail_connected: false,
 };
+
+const EMPTY_SECRETS: Secrets = { jooble_api_key: '', gemini_api_key: '', groq_api_key: '' };
 
 const ATS: Array<{ value: TargetCompany['ats']; label: string; example: string }> = [
   { value: 'greenhouse', label: 'Greenhouse', example: 'boards.greenhouse.io/<slug>' },
@@ -34,7 +38,7 @@ const ATS: Array<{ value: TargetCompany['ats']; label: string; example: string }
   { value: 'smartrecruiters', label: 'SmartRecruiters', example: 'jobs.smartrecruiters.com/<slug>' },
 ];
 
-export function Settings() {
+export function Settings({ onSaved }: { onSaved?: () => void } = {}) {
   const loaded = useAsync(profile);
   const [p, setP] = useState<Omit<Profile, 'user_id'>>(EMPTY);
   useEffect(() => {
@@ -53,7 +57,11 @@ export function Settings() {
       style={{ display: 'grid', gap: 'var(--space-5)' }}
       onSubmit={(e) => {
         e.preventDefault();
-        save.run(() => saveProfile(p), 'Settings saved').then((ok) => ok && loaded.reload());
+        save.run(() => saveProfile(p), 'Settings saved').then((ok) => {
+          if (!ok) return;
+          loaded.reload();
+          onSaved?.();
+        });
       }}
     >
       <header className="page-head">
@@ -66,6 +74,8 @@ export function Settings() {
         </button>
       </header>
       <ErrorBox error={loaded.error ?? save.error} />
+
+      <Connections gmailConnected={p.gmail_connected} />
 
       <section className="panel" aria-labelledby="profile-h">
         <h2 id="profile-h">Profile</h2>
@@ -150,10 +160,9 @@ export function Settings() {
         <div className="form-grid">
           <div className="field">
             <label htmlFor="channel">Send it by</label>
-            <select id="channel" className="input" value={p.digest_channel} onChange={(e) => set('digest_channel', e.target.value as Profile['digest_channel'])}>
+            <select id="channel" className="input" value={p.digest_channel === 'email' ? 'none' : p.digest_channel} onChange={(e) => set('digest_channel', e.target.value as Profile['digest_channel'])}>
               <option value="none">Don't send</option>
               <option value="telegram">Telegram</option>
-              <option value="email">Email</option>
             </select>
           </div>
           {p.digest_channel === 'telegram' && (
@@ -162,14 +171,8 @@ export function Settings() {
               <input id="tg" className="input" inputMode="numeric" value={p.telegram_chat_id ?? ''} onChange={(e) => set('telegram_chat_id', e.target.value)} />
             </div>
           )}
-          {p.digest_channel === 'email' && (
-            <div className="field">
-              <label htmlFor="dmail">Send to</label>
-              <input id="dmail" className="input" type="email" value={p.digest_email ?? ''} onChange={(e) => set('digest_email', e.target.value)} />
-            </div>
-          )}
         </div>
-        <p className="xs muted">Telegram: message your bot once, then get your chat id from @userinfobot. Email needs the Gmail send permission (npm run gmail:auth -- --send).</p>
+        <p className="xs muted">Message your bot once, then get your chat id from @userinfobot. Email digests are off for everyone right now — they'd otherwise go out through one shared Gmail account.</p>
       </section>
 
       <Sources />
@@ -238,6 +241,86 @@ function Companies({ value, onChange }: { value: TargetCompany[]; onChange: (v: 
         </button>
       </div>
       <p className="xs muted">Remember to save changes.</p>
+    </section>
+  );
+}
+
+function Connections({ gmailConnected }: { gmailConnected: boolean }) {
+  const loaded = useAsync(secrets);
+  const [s, setS] = useState<Secrets>(EMPTY_SECRETS);
+  useEffect(() => {
+    if (loaded.data) setS({ ...EMPTY_SECRETS, ...loaded.data });
+  }, [loaded.data]);
+  const save = useAction();
+  const connect = useAction();
+  const request = useAction();
+  const [requestEmail, setRequestEmail] = useState('');
+
+  return (
+    <section className="panel" aria-labelledby="conn-h">
+      <h2 id="conn-h">Connections</h2>
+      <ErrorBox error={loaded.error ?? save.error ?? connect.error ?? request.error} />
+
+      <div className="health">
+        <span>
+          <span className={`dot ${gmailConnected ? 'ok' : ''}`} aria-hidden="true" />
+          Gmail {gmailConnected ? '— connected' : '— not connected'}
+        </span>
+        <button type="button" className="btn btn-small" disabled={connect.busy} onClick={() => connect.run(async () => { const { error } = await signInWithGmail(); if (error) throw new Error(error.message); })}>
+          {gmailConnected ? 'Reconnect' : 'Connect Gmail'}
+        </button>
+      </div>
+      <p className="xs muted">Reads job-alert emails (Indeed, LinkedIn, Bayt, Naukrigulf). Reconnect here if it ever stops finding new mail. Limited beta: only approved Google accounts can connect right now.</p>
+
+      {!gmailConnected && (
+        <div className="form-grid" style={{ marginTop: '0.5rem' }}>
+          <div className="field">
+            <label htmlFor="gmail-request">Not approved yet? Leave your Google account email and we'll add you</label>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <input
+                id="gmail-request"
+                className="input"
+                type="email"
+                placeholder="you@gmail.com"
+                value={requestEmail}
+                onChange={(e) => setRequestEmail(e.target.value)}
+              />
+              <button
+                type="button"
+                className="btn btn-small"
+                disabled={request.busy || !requestEmail.trim()}
+                onClick={() => request.run(() => requestGmailAccess(requestEmail.trim()), 'Request sent')}
+              >
+                Request access
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <hr className="divider" />
+
+      <div className="form-grid">
+        <div className="field">
+          <label htmlFor="jooble-key">Jooble API key (optional)</label>
+          <input id="jooble-key" className="input" value={s.jooble_api_key ?? ''} onChange={(e) => setS({ ...s, jooble_api_key: e.target.value })} />
+        </div>
+        <div className="field">
+          <label htmlFor="gemini-key">Gemini API key (optional)</label>
+          <input id="gemini-key" className="input" value={s.gemini_api_key ?? ''} onChange={(e) => setS({ ...s, gemini_api_key: e.target.value })} />
+        </div>
+        <div className="field">
+          <label htmlFor="groq-key">Groq API key (optional fallback)</label>
+          <input id="groq-key" className="input" value={s.groq_api_key ?? ''} onChange={(e) => setS({ ...s, groq_api_key: e.target.value })} />
+        </div>
+      </div>
+      <p className="xs muted">
+        Free keys: Jooble at jooble.org/api/about, Gemini at aistudio.google.com/apikey, Groq at console.groq.com/keys. Without
+        these, Unslog still runs on email alerts alone and scores with the free heuristic instead of AI.
+      </p>
+      <button type="button" className="btn" disabled={save.busy} onClick={() => save.run(() => saveSecrets(s), 'Keys saved')}>
+        Save keys
+      </button>
     </section>
   );
 }

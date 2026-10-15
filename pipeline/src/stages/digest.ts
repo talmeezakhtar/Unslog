@@ -14,7 +14,7 @@ const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 
 /** The morning message as Telegram-flavoured HTML (Telegram supports a small set of tags). */
 export function digestTelegram(c: DigestContent, appUrl: string): string {
-  const lines = [`<b>Callback · your morning shortlist</b>`];
+  const lines = [`<b>Unslog · your morning shortlist</b>`];
   if (c.jobs.length === 0) lines.push('', 'No new strong matches today. Check your filters if this keeps happening.');
   else {
     lines.push('', `<b>Top ${c.jobs.length} jobs</b>`);
@@ -44,7 +44,7 @@ export function digestEmailHtml(c: DigestContent, appUrl: string): string {
 <h2 style="margin:0 0 12px">Your morning shortlist</h2>
 ${c.jobs.length ? `<table>${jobRows}</table>` : '<p>No new strong matches today.</p>'}
 ${c.followUps.length ? `<h3>Follow-ups due</h3><ul>${follow}</ul>` : ''}
-<p><a href="${esc(appUrl)}">Open Callback</a></p></div>`;
+<p><a href="${esc(appUrl)}">Open Unslog</a></p></div>`;
 }
 
 export async function sendTelegram(botToken: string, chatId: string, html: string): Promise<void> {
@@ -70,7 +70,7 @@ export async function sendDigest(config: Config, repo: Repo, profile: Profile): 
         throw new Error('Email digest needs the Gmail keys (with the send scope) and a digest email in Settings');
       }
       const gmail = new GmailClient({ clientId: config.GMAIL_CLIENT_ID, clientSecret: config.GMAIL_CLIENT_SECRET, refreshToken: config.GMAIL_REFRESH_TOKEN });
-      await gmail.sendHtml(profile.digestEmail, `Callback: ${content.jobs.length} jobs for you today`, digestEmailHtml(content, config.APP_URL));
+      await gmail.sendHtml(profile.digestEmail, `Unslog: ${content.jobs.length} jobs for you today`, digestEmailHtml(content, config.APP_URL));
     }
     await repo.recordDigest(record);
     return 'sent';

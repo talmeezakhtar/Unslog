@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { Building2, CalendarDays, Funnel, Reply, TrendingUp, Wallet } from 'lucide-react';
 import { insights, profile } from '../lib/api';
 import { shortDate } from '../lib/format';
 import { useAsync } from '../lib/hooks';
 import { ColumnChart, DataTable, HBarChart, RangeChart } from '../components/charts';
-import { Empty, ErrorBox, Loading } from '../components/ui';
+import { Empty, ErrorBox, initials, Loading } from '../components/ui';
 
 const aed = (n: number) => `AED ${Math.round(n / 100) / 10}k`;
 
@@ -37,7 +38,10 @@ export function Insights() {
 
       <div className="cols">
         <section className="panel wide" aria-labelledby="skills-h">
-          <h2 id="skills-h">Skills most asked for</h2>
+          <h2 id="skills-h" className="chart-title">
+            <TrendingUp className="chart-title-icon" size={17} aria-hidden="true" />
+            Skills most asked for
+          </h2>
           <p className="small muted">Share of new jobs that mention each skill. Your skills are in amber.</p>
           <ErrorBox error={skills.error} />
           {skills.loading ? (
@@ -51,6 +55,7 @@ export function Insights() {
                 <span className="mine">Your skills</span>
               </div>
               <HBarChart
+                key={days}
                 label="Share of jobs mentioning each skill"
                 rows={skills.data.map((s) => ({ label: s.skill, value: Number(s.share), tip: `${s.skill}: ${s.jobs} jobs (${s.share}%)` }))}
                 format={(n) => `${n}%`}
@@ -62,7 +67,10 @@ export function Insights() {
         </section>
 
         <section className="panel narrow" aria-labelledby="co-h" style={{ display: 'grid' }}>
-          <h2 id="co-h">Most active companies</h2>
+          <h2 id="co-h" className="chart-title">
+            <Building2 className="chart-title-icon" size={17} aria-hidden="true" />
+            Most active companies
+          </h2>
           {companies.loading ? (
             <Loading rows={3} />
           ) : !companies.data?.length ? (
@@ -71,7 +79,12 @@ export function Insights() {
             <ol className="list">
               {companies.data.map((c) => (
                 <li key={c.company} className="health">
-                  <span>{c.company}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span className="avatar avatar-sm" aria-hidden="true">
+                      {initials(c.company)}
+                    </span>
+                    {c.company}
+                  </span>
                   <span className="muted">{c.jobs} jobs</span>
                 </li>
               ))}
@@ -82,29 +95,41 @@ export function Insights() {
 
       <div className="cols">
         <section className="panel" style={{ flex: '1 1 380px' }} aria-labelledby="weekly-h">
-          <h2 id="weekly-h">New jobs per week</h2>
+          <h2 id="weekly-h" className="chart-title">
+            <CalendarDays className="chart-title-icon" size={17} aria-hidden="true" />
+            New jobs per week
+          </h2>
           {weekly.loading ? <Loading rows={2} /> : !weekly.data?.length ? <Empty title="No weeks yet" /> : <ColumnChart width={440} label="New unique jobs per week" rows={weekly.data.map((w) => ({ label: shortDate(w.week), value: Number(w.jobs) }))} />}
         </section>
         <section className="panel" style={{ flex: '1 1 380px' }} aria-labelledby="sal-h">
-          <h2 id="sal-h">Salary ranges mentioned</h2>
+          <h2 id="sal-h" className="chart-title">
+            <Wallet className="chart-title-icon" size={17} aria-hidden="true" />
+            Salary ranges mentioned
+          </h2>
           <p className="small muted">Monthly AED, from postings that list a salary.</p>
           {salaries.loading ? (
             <Loading rows={2} />
           ) : !salaries.data?.length ? (
             <Empty title="Too few postings list a salary yet" />
           ) : (
-            <RangeChart width={440} label="Salary range by job title" format={aed} rows={salaries.data.map((s) => ({ label: s.title, low: s.low, high: s.high, tip: `${s.title}: ${aed(s.low)} to ${aed(s.high)} (${s.jobs} jobs)` }))} />
+            <RangeChart key={days} width={440} label="Salary range by job title" format={aed} rows={salaries.data.map((s) => ({ label: s.title, low: s.low, high: s.high, tip: `${s.title}: ${aed(s.low)} to ${aed(s.high)} (${s.jobs} jobs)` }))} />
           )}
         </section>
       </div>
 
       <div className="cols">
         <section className="panel" style={{ flex: '1 1 380px' }} aria-labelledby="funnel-h">
-          <h2 id="funnel-h">Your funnel</h2>
+          <h2 id="funnel-h" className="chart-title">
+            <Funnel className="chart-title-icon" size={17} aria-hidden="true" />
+            Your funnel
+          </h2>
           {funnel.loading ? <Loading rows={2} /> : <HBarChart width={440} label="Jobs at each stage" rows={(funnel.data ?? []).map((f) => ({ label: f.stage, value: Number(f.n) }))} />}
         </section>
         <section className="panel" style={{ flex: '1 1 380px' }} aria-labelledby="reply-h">
-          <h2 id="reply-h">Reply rate by channel</h2>
+          <h2 id="reply-h" className="chart-title">
+            <Reply className="chart-title-icon" size={17} aria-hidden="true" />
+            Reply rate by channel
+          </h2>
           {replies.loading ? (
             <Loading rows={2} />
           ) : !replies.data?.length ? (

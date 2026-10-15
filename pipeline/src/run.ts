@@ -101,6 +101,15 @@ export async function matchUser(repo: Repo, profile: Profile, now = new Date()):
   return { matched: jobs.length, passed };
 }
 
+/** A profile scoring against the shared Gemini/Groq key can't claim more of it than this slice,
+ *  regardless of its own max_ai_jobs_per_day (up to 500) — otherwise one signed-up user could
+ *  exhaust the whole day's shared quota alone. BYOK users spend their own key and keep their
+ *  full setting. */
+export function scoringProfile(profile: Profile, hasOwnKey: boolean, config: Pick<Config, 'SHARED_AI_MAX_JOBS_PER_USER_PER_DAY'>): Profile {
+  if (hasOwnKey) return profile;
+  return { ...profile, maxAiJobsPerDay: Math.min(profile.maxAiJobsPerDay, config.SHARED_AI_MAX_JOBS_PER_USER_PER_DAY) };
+}
+
 export interface RunOptions {
   steps?: readonly Step[];
   /** Inject collectors (tests); defaults to buildCollectors(config, ...). */
@@ -164,11 +173,11 @@ export async function runPipeline(config: Config, repo: Repo, opts: RunOptions =
 
     // Per-user Gemini/Groq key if they've brought one, falling back to the instance-wide .env
     // key otherwise — same BYOK-or-shared-default pattern as Jooble above.
-    const profileAi =
-      opts.ai ??
-      (secrets.geminiApiKey || secrets.groqApiKey
-        ? buildRouter({ ...config, GEMINI_API_KEY: secrets.geminiApiKey ?? config.GEMINI_API_KEY, GROQ_API_KEY: secrets.groqApiKey ?? config.GROQ_API_KEY }, repo)
-        : ai);
+    const hasOwnKey = Boolean(secrets.geminiApiKey || secrets.groqApiKey);
+    const profileAi = opts.ai ?? (hasOwnKey ? buildRouter({ ...config, GEMINI_API_KEY: secrets.geminiApiKey ?? config.GEMINI_API_KEY, GROQ_API_KEY: secrets.groqApiKey ?? config.GROQ_API_KEY }, repo) : ai);
+    // opts.ai (tests) injects a fixed router that isn't actually the shared instance-wide one,
+    // so the fairness cap doesn't apply to it.
+    const scoreProfile = opts.ai ? profile : scoringProfile(profile, hasOwnKey, config);
 
     const u = { userId: profile.userId, matched: 0, passed: 0, aiScored: 0, heuristic: 0, drafted: 0, followUps: 0, digest: 'skipped' };
     const stage = async (name: Step, fn: () => Promise<void>) => {
@@ -185,7 +194,7 @@ export async function runPipeline(config: Config, repo: Repo, opts: RunOptions =
       Object.assign(u, await matchUser(repo, profile));
     });
     await stage('score', async () => {
-      const r = await scoreJobs(repo, profileAi, profile);
+      const r = await scoreJobs(repo, profileAi, scoreProfile);
       u.aiScored = r.ai;
       u.heuristic = r.heuristic;
     });

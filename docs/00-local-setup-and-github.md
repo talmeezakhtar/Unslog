@@ -1,6 +1,6 @@
 # Local setup and pushing to GitHub
 
-This guide gets Callback from a zip file onto your computer, running, and into your own GitHub
+This guide gets Unslog from a zip file onto your computer, running, and into your own GitHub
 repository. It takes about 20 minutes. After that, [Getting started](01-getting-started.md)
 connects the database, job sources and AI keys.
 
@@ -60,13 +60,13 @@ the code it shows.
 
 ## 2. Unzip and install
 
-1. Unzip `callback.zip` somewhere you keep code, for example `~/projects/callback` (Windows:
-   `C:\Users\<you>\projects\callback`). Avoid folders synced by OneDrive or iCloud: they slow
+1. Unzip `unslog.zip` somewhere you keep code, for example `~/projects/unslog` (Windows:
+   `C:\Users\<you>\projects\unslog`). Avoid folders synced by OneDrive or iCloud: they slow
    `npm install` down and can lock files.
 2. Open a terminal in that folder:
 
 ```bash
-cd ~/projects/callback
+cd ~/projects/unslog
 npm install
 ```
 
@@ -113,7 +113,7 @@ Then save everything as the first commit:
 
 ```bash
 git add .
-git commit -m "Initial commit: Callback job-hunt copilot"
+git commit -m "Initial commit: Unslog job-hunt copilot"
 ```
 
 This is still only on your computer.
@@ -123,22 +123,22 @@ This is still only on your computer.
 **Option A, one command** (inside the project folder):
 
 ```bash
-gh repo create callback --private --source=. --remote=origin --push
+gh repo create unslog --private --source=. --remote=origin --push
 ```
 
-It creates a private repository called `callback`, links it as `origin` and uploads your commit.
+It creates a private repository called `unslog`, links it as `origin` and uploads your commit.
 
 **Option B, on the website.**
 
 1. Go to [github.com/new](https://github.com/new).
-2. Name it `callback` and choose **Private**.
+2. Name it `unslog` and choose **Private**.
 3. **Do not** tick "Add a README", ".gitignore" or "license". The project already has all three,
    and a non-empty repository makes the first push fail.
 4. Click **Create repository**, copy the HTTPS address (like
-   `https://github.com/<you>/callback.git`) and run:
+   `https://github.com/<you>/unslog.git`) and run:
 
 ```bash
-git remote add origin https://github.com/<you>/callback.git
+git remote add origin https://github.com/<you>/unslog.git
 git push -u origin main
 ```
 

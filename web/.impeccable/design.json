@@ -1,28 +1,32 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-08T15:56:42.564Z",
-  "title": "Design System: Unslog — The Ticket Wallet",
+  "generatedAt": "2026-10-12T00:00:00.000Z",
+  "title": "Design System: Unslog — The Frosted Pane",
   "extensions": {
     "colorMeta": {
-      "jet-red": { "role": "primary", "displayName": "Jet Red", "canonical": "#d7262d", "tonalRamp": ["#3a0b0d", "#5c1316", "#7f1b1e", "#a22226", "#d7262d", "#e4675f", "#ef5a52", "#f6a09a"] },
-      "carbon-purple": { "role": "secondary", "displayName": "Carbon Purple", "canonical": "#4b2e83", "tonalRamp": ["#140c23", "#241745", "#352167", "#4b2e83", "#6a48ab", "#8a6ac5", "#b6a3e8", "#dcd2f5"] },
-      "paper": { "role": "neutral", "displayName": "Coupon Paper", "canonical": "#f3efe4", "tonalRamp": ["#10161f", "#182030", "#1f2a3d", "#5b6273", "#a9a08a", "#d9d2bf", "#ece7d8", "#f3efe4"] },
-      "ticket-stock": { "role": "neutral", "displayName": "Ticket Stock", "canonical": "#fffdf8", "tonalRamp": ["#182030", "#242e42", "#3a4458", "#6e7484", "#a9a08a", "#d9d2bf", "#efe9dd", "#fffdf8"] },
-      "surface-sunken": { "role": "neutral", "displayName": "Sunken Stock", "canonical": "#ece7d8", "tonalRamp": ["#1f2a3d", "#2b3750", "#3d4a66", "#5b6273", "#a9a08a", "#c7bfa8", "#ddd6c2", "#ece7d8"] },
-      "carrier-navy": { "role": "neutral", "displayName": "Carrier Navy", "canonical": "#13203a", "tonalRamp": ["#13203a", "#1c2d4e", "#2d3b52", "#495a79", "#5b6273", "#9aa3b8", "#c7ccd8", "#eceef3"] },
-      "ink-muted": { "role": "neutral", "displayName": "Navy Muted", "canonical": "#5b6273", "tonalRamp": ["#1c2130", "#2d3344", "#3f4759", "#5b6273", "#767d8f", "#9aa3b8", "#c3c9d4", "#e5e8ed"] },
-      "danger": { "role": "neutral", "displayName": "Deep Clearance", "canonical": "#b0191f", "tonalRamp": ["#300608", "#52090c", "#740d11", "#962017", "#b0191f", "#d14b45", "#ff8178", "#ffbab4"] },
-      "good": { "role": "neutral", "displayName": "Cleared Green (health dots only)", "canonical": "#1f6b4d", "tonalRamp": ["#0a2318", "#113a28", "#185138", "#1f6b4d", "#2e8d66", "#55ab86", "#6fcf9e", "#a9e6c8"] }
+      "action": { "role": "primary", "displayName": "Action (indigo)", "canonical": "#5b4fe8", "tonalRamp": ["#15123a", "#241f5e", "#332c82", "#453bb0", "#5b4fe8", "#8277ef", "#a79ff3", "#d3cefa"] },
+      "attention": { "role": "secondary", "displayName": "Attention (magenta)", "canonical": "#c23d95", "tonalRamp": ["#330f26", "#56193f", "#7a2358", "#9d2d71", "#c23d95", "#d56bb0", "#e498c9", "#f4d4e8"] },
+      "ground": { "role": "neutral", "displayName": "Ground", "canonical": "#fafbfc", "tonalRamp": ["#101217", "#181b22", "#1f2a3d", "#6b7280", "#b8bac0", "#e4e5e8", "#f2f3f5", "#fafbfc"] },
+      "surface": { "role": "neutral", "displayName": "Surface", "canonical": "#ffffff", "tonalRamp": ["#181b22", "#242833", "#3a4048", "#6b7280", "#b8bac0", "#e4e5e8", "#f2f3f5", "#ffffff"] },
+      "surface-sunken": { "role": "neutral", "displayName": "Surface Sunken", "canonical": "#f2f3f5", "tonalRamp": ["#1f232c", "#2b3038", "#3d434d", "#6b7280", "#b8bac0", "#d2d4d8", "#e8e9eb", "#f2f3f5"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#171717", "tonalRamp": ["#171717", "#262626", "#3d3d3d", "#595959", "#6b7280", "#9ca3af", "#d1d5db", "#f5f5f5"] },
+      "ink-muted": { "role": "neutral", "displayName": "Ink Muted", "canonical": "#6b7280", "tonalRamp": ["#1e2127", "#2f333c", "#434852", "#6b7280", "#868c97", "#a3a9b3", "#c6cad2", "#e9eaed"] },
+      "danger": { "role": "neutral", "displayName": "Danger", "canonical": "#e24b36", "tonalRamp": ["#330d07", "#55150c", "#781d10", "#9b2914", "#e24b36", "#ea7664", "#f29c8f", "#f9cac3"] },
+      "good": { "role": "neutral", "displayName": "Good (health dots only)", "canonical": "#3fa66b", "tonalRamp": ["#0e2a1b", "#17432b", "#215c3a", "#2c7a4d", "#3fa66b", "#63c08b", "#92d6ad", "#c6ebd4"] }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display / Label (Big Shoulders Display)", "purpose": "Headlines, nav links, buttons, tags, tabs, table headers — always uppercase, never body prose." },
-      "body": { "displayName": "Body (IBM Plex Sans)", "purpose": "Paragraphs, descriptions, drafted cover-note text." },
+      "display": { "displayName": "Display / Body (Geist Variable)", "purpose": "Headlines, nav links, buttons, body prose — one type voice; hierarchy by weight and size, never uppercase tracking." },
       "mono": { "displayName": "Mono / Tabular (IBM Plex Mono)", "purpose": "Fit scores, dates, salaries, counts — every number a user scans to compare." }
     },
-    "shadows": [],
+    "shadows": [
+      { "name": "panel", "value": "0 1px 2px color-mix(in srgb, var(--ink) 4%, transparent), 0 8px 24px -12px color-mix(in srgb, var(--ink) 10%, transparent)", "purpose": "Frosted panels/cards/stats float over the ambient glow." },
+      { "name": "button-bevel", "value": "inset 0 1px 0 color-mix(in srgb, white 25%, transparent), 0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent)", "purpose": "Glass buttons' top highlight, matching the sign-in screen's glass-button material." }
+    ],
     "motion": [
-      { "name": "score-fill", "value": "transform 400ms ease-out", "purpose": "The score circle's red fill rises on load/update; respects prefers-reduced-motion." },
-      { "name": "interactive-state", "value": "color/border-color/background-color 120ms ease-out", "purpose": "Nav links, tags, and buttons transition state changes; respects prefers-reduced-motion." }
+      { "name": "score-fill", "value": "transform 400ms ease-out", "purpose": "The score dial's indigo fill rises on load/update; respects prefers-reduced-motion." },
+      { "name": "interactive-state", "value": "color/border-color/background-color 120ms ease-out", "purpose": "Nav links, tags, and buttons transition state changes; respects prefers-reduced-motion." },
+      { "name": "ambient-glow", "value": "transform (translate+scale) 22-26s ease-in-out infinite, blur(50-60px)", "purpose": "The slow-drifting two-colour radial glow behind the sidebar and the whole app; disabled under prefers-reduced-motion." },
+      { "name": "page-entrance", "value": "opacity/y/blur 300ms ease-out via framer-motion", "purpose": "Every page's content fades and un-blurs in on navigation, centralized in Layout.tsx." }
     ],
     "breakpoints": [
       { "name": "mobile", "value": "720px" },
@@ -34,90 +38,76 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Jet-red filled action button, e.g. Save, Apply, Continue with Google.",
+      "description": "Solid action-indigo filled button, e.g. Save, Apply, Mark as applied.",
       "html": "<button class=\"ds-btn-primary\">Save</button>",
-      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 3px; border: 1.5px solid #d7262d; background: #d7262d; color: #fffdf8; font-family: 'Big Shoulders Display', 'Segoe UI', system-ui, sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; cursor: pointer; transition: filter 120ms ease-out, transform 120ms ease-out; } .ds-btn-primary:hover { filter: brightness(1.08); } .ds-btn-primary:active { transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(215,38,45,0.45); }"
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid #5b4fe8; background: #5b4fe8; color: #fcfcfc; font-family: 'Geist Variable', 'Segoe UI', system-ui, sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: filter 120ms ease-out, transform 120ms ease-out; } .ds-btn-primary:hover { filter: brightness(1.08); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(91,79,232,0.45); }"
     },
     {
-      "name": "Secondary Button",
+      "name": "Glass Button",
       "kind": "button",
-      "refersTo": "button-secondary",
-      "description": "Paper-surface, navy-bordered ticket-stub button, e.g. Review, Cancel.",
-      "html": "<button class=\"ds-btn-secondary\">Review</button>",
-      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 3px; border: 1.5px solid #13203a; background: #fffdf8; color: #13203a; font-family: 'Big Shoulders Display', 'Segoe UI', system-ui, sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; cursor: pointer; transition: filter 120ms ease-out, transform 120ms ease-out; } .ds-btn-secondary:hover { filter: brightness(0.96); } .ds-btn-secondary:active { transform: translateY(1px); } .ds-btn-secondary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(215,38,45,0.45); }"
+      "refersTo": "button-glass",
+      "description": "Translucent, backdrop-blurred secondary button over the ambient glow — the sign-in screen's glass-button material, adapted to a 44px rectangle for dense dashboard use.",
+      "html": "<button class=\"ds-btn-glass\">Review</button>",
+      "css": ".ds-btn-glass { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid #b8bac0; background: linear-gradient(-75deg, rgba(255,255,255,0.4), rgba(255,255,255,0.75), rgba(255,255,255,0.4)); backdrop-filter: blur(8px); color: #171717; font-family: 'Geist Variable', 'Segoe UI', system-ui, sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 1px 2px rgba(0,0,0,0.06); }"
     },
     {
       "name": "Fit Score",
       "kind": "custom",
       "refersTo": "score",
-      "description": "Ink-stamped circular fit score (0-100); a jet-red fill rises from the bottom in proportion to the score. The system's signature high-scannability element.",
+      "description": "Frosted circular fit score (0-100); an indigo fill rises from the bottom in proportion to the score. No rotation (the old system's ink-stamp rotation is retired with it).",
       "html": "<div class=\"ds-score\" role=\"img\" aria-label=\"Fit score 86 out of 100\"><span class=\"ds-score-fill\" style=\"transform: scaleY(0.86)\"></span><span class=\"ds-score-num\">86</span></div>",
-      "css": ".ds-score { position: relative; width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; overflow: hidden; background: #fffdf8; color: #13203a; border: 2px solid #a9a08a; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 700; font-size: 1.2rem; transform: rotate(-3deg); } .ds-score-fill { position: absolute; inset: auto 0 0 0; height: 100%; background: #d7262d; opacity: 0.14; transform-origin: bottom; transition: transform 400ms ease-out; } .ds-score-num { position: relative; }"
+      "css": ".ds-score { position: relative; width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; overflow: hidden; background: rgba(255,255,255,0.7); backdrop-filter: blur(8px); color: #171717; border: 1.5px solid #b8bac0; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 700; font-size: 1.1rem; } .ds-score-fill { position: absolute; inset: auto 0 0 0; height: 100%; background: linear-gradient(0deg, #5b4fe8, transparent); opacity: 0.22; transform-origin: bottom; transition: transform 400ms ease-out; } .ds-score-num { position: relative; }"
     },
     {
-      "name": "Tag — Cleared (navy stamp)",
+      "name": "Tag — Good (pill)",
       "kind": "chip",
       "refersTo": "tag-good",
-      "description": "Navy-filled 'cleared' stamp for good/confirmed states (e.g. visa clear). Deliberately not green — replaced an off-world green during finish review.",
+      "description": "Pill-shaped good/confirmed tag (e.g. visa clear), indigo-soft fill. Replaces the old navy ink-stamp square tag.",
       "html": "<span class=\"ds-tag-good\">Visa clear</span>",
-      "css": ".ds-tag-good { display: inline-block; font-family: 'Big Shoulders Display', 'Segoe UI', system-ui, sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 8px; border: 1px solid #13203a; border-radius: 3px; background: #13203a; color: #fffdf8; }"
+      "css": ".ds-tag-good { display: inline-block; font-family: 'Geist Variable', 'Segoe UI', system-ui, sans-serif; font-size: 0.75rem; font-weight: 600; padding: 3px 10px; border: 1px solid rgba(91,79,232,0.4); border-radius: 999px; background: #ecebfc; color: #5b4fe8; }"
     },
     {
-      "name": "VOID Stamp Card",
+      "name": "Closed Card Badge",
       "kind": "custom",
-      "refersTo": "card",
-      "description": "Closed/rejected pipeline card: the application stays fully visible at 72% opacity under a diagonal, hand-stamped VOID mark (SVG feTurbulence/feDisplacementMap distressed edge, not a clean box).",
-      "html": "<article class=\"ds-card-void\"><p class=\"ds-card-title\">Senior Analyst — Example Co</p><span class=\"ds-void-mark\">VOID</span></article>",
-      "css": ".ds-card-void { position: relative; background: #fffdf8; border: 1px solid #d9d2bf; border-radius: 3px; padding: 12px; opacity: 0.72; overflow: hidden; } .ds-card-title { margin: 0; font-weight: 700; color: #13203a; } .ds-void-mark { position: absolute; top: 38%; left: 50%; transform: translate(-50%, -50%) rotate(-10deg); font-family: 'Big Shoulders Display', 'Segoe UI', system-ui, sans-serif; font-weight: 800; font-size: 1.6rem; letter-spacing: 0.08em; color: #b0191f; border: 2px solid #b0191f; outline: 1.5px solid #b0191f; outline-offset: 3px; border-radius: 2px; padding: 0 10px; opacity: 0.68; }"
+      "refersTo": "card-void",
+      "description": "Closed/rejected pipeline card: the application stays fully visible at 68% opacity under a small 'Closed' pill badge in the corner. Replaces the old diagonal hand-stamped VOID mark (SVG feTurbulence distressed edge) — that stamped-ink texture was specific to the retired paper-ticket world.",
+      "html": "<article class=\"ds-card-void\"><p class=\"ds-card-title\">Senior Analyst — Example Co</p><span class=\"ds-closed-badge\">Closed</span></article>",
+      "css": ".ds-card-void { position: relative; background: rgba(255,255,255,0.85); border: 1px solid #e4e5e8; border-radius: 8px; padding: 12px; opacity: 0.68; overflow: hidden; } .ds-card-title { margin: 0; font-weight: 600; color: #171717; } .ds-closed-badge { position: absolute; top: 8px; right: 8px; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #e24b36; border: 1px solid rgba(226,75,54,0.45); background: rgba(226,75,54,0.1); border-radius: 999px; padding: 2px 8px; }"
     },
     {
-      "name": "Pipeline Lane",
+      "name": "Ambient Glow",
       "kind": "custom",
-      "refersTo": "lane",
-      "description": "A hard-cornered, top-bordered coupon-book lane holding application cards; turns carbon-purple only when it is the follow-up-due lane with cards waiting.",
-      "html": "<section class=\"ds-lane\"><div class=\"ds-lane-head\"><h2>Follow-up due</h2><span>2</span></div></section>",
-      "css": ".ds-lane { background: #ece7d8; border-radius: 0; padding: 12px; border-top: 3px solid #a9a08a; display: grid; gap: 12px; } .ds-lane.ds-attention { background: #e7e0f3; border-top-color: #4b2e83; } .ds-lane-head { display: flex; justify-content: space-between; align-items: baseline; } .ds-lane-head h2 { margin: 0; font-family: 'Big Shoulders Display', 'Segoe UI', system-ui, sans-serif; font-size: 1rem; letter-spacing: 0.03em; text-transform: uppercase; color: #13203a; }"
-    },
-    {
-      "name": "Tear Perforation",
-      "kind": "custom",
-      "refersTo": "tear",
-      "description": "Dashed divider with punched-circle ends; the system's standing substitute for a plain rule or shadowed card edge.",
-      "html": "<div class=\"ds-tear\" aria-hidden=\"true\"></div>",
-      "css": ".ds-tear { position: relative; border-top: 1.5px dashed #a9a08a; margin-top: 4px; } .ds-tear::before, .ds-tear::after { content: ''; position: absolute; top: -7px; width: 14px; height: 14px; border-radius: 50%; background: #f3efe4; } .ds-tear::before { left: -21px; } .ds-tear::after { right: -21px; }"
+      "refersTo": "body::before, .sidebar::before",
+      "description": "The slow-drifting two-colour radial glow behind the whole app (faint) and behind the sidebar (stronger), the material every backdrop-blurred panel genuinely blurs. Direct continuation of the sign-in screen's GradientBackground component, re-expressed in pure CSS so every page can share it without extra DOM.",
+      "html": "<div class=\"ds-glow\" aria-hidden=\"true\"></div>",
+      "css": ".ds-glow { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.5; background-image: radial-gradient(circle at 12% 18%, rgba(91,79,232,0.2) 0%, transparent 42%), radial-gradient(circle at 88% 82%, rgba(194,61,149,0.16) 0%, transparent 45%); filter: blur(60px); animation: glow-float-a 26s ease-in-out infinite; }"
     }
   ],
   "narrative": {
-    "northStar": "The Ticket Wallet",
-    "overview": "Every job and application in Unslog is drawn as a travel document, not a SaaS record. The dashboard is the inside of a jet-age ticket wallet: coupon-stock paper underneath, carrier-navy structure holding it together, and jet red as the one committed signal color — stamped onto scores, printed on primary buttons, and burned into the \"Today\" boarding-pass summary. Carbon purple is held back for exactly one job: marking a duplicate sighting or a follow-up that's gone quiet, so that signal is never confused with the red of a primary action. Rejected or withdrawn applications are never deleted — they're VOIDed, stamped and kept in the lane, honest about what happened to them.\n\nThis system was chosen over \"The Noticeboard Wall\" in a direction tournament and replaces the dashboard's prior, untracked visual state wholesale; there is no earlier DESIGN.md to reconcile against. The build keeps the product's one load-bearing constraint — fit scores and visa/residency flags stay instantly scannable — by giving the score its own stamped, high-contrast circular slot and by giving visa tags their own tag-attention/tag-good treatment rather than burying either in body text. The product was renamed from \"Callback\" to \"Unslog\" after this system shipped (user-supplied name and brand sheet), with a new mark: a rounded-square tile holding an up-right arrow and two underline bars, built as a single-accent mark (tile and arrow+bars both riding --action) rather than the supplied sheet's two-accent ink/orange duotone. The wordmark text and mark shape are the fixed brand asset going forward; the mark's accent is explicitly not pinned to a fixed hue — it rides the system's single committed accent color, so the mark always matches the live world instead of carrying an older palette forward.",
+    "northStar": "The Frosted Pane",
+    "overview": "The sign-in screen introduced a specific material: neutral glass chrome — buttons, inputs, and panels in translucent, blurred ink/paper — floating over a slow-drifting two-colour radial glow. This system carries that same pane of glass into every page of the dashboard, not just the login screen, so the whole app reads as one continuous material rather than a styled lobby in front of a differently-styled building.\n\nThis replaces the prior \"Ticket Wallet\" system (flat ink-bordered ticket stock, condensed-caps display type, a hand-stamped VOID mark, dashed tear perforations) wholesale, per explicit user request to reuse the new sign-in page's theme everywhere while keeping every page's functionality identical. Product truth, every page's structure, every data flow, and every interaction are unchanged — this is a full re-skin, not a rebuild. The product's one load-bearing constraint carries over in translation: fit scores and visa/residency flags stay instantly scannable, now via a frosted score dial and pill tags rather than an ink stamp and square ticket tags.",
     "keyCharacteristics": [
-      "Coupon-white paper ground with carrier-navy ink structure; jet red is the only accent allowed to carry primary action and live-status weight.",
-      "Perforated tear lines (dashed rule + punched circular ends) stand in for card dividers and section breaks.",
-      "Big Shoulders Display (condensed uppercase) for every label, heading, button, and tab; IBM Plex Sans for body copy; IBM Plex Mono with tabular numerals for every score, date, salary, and count.",
-      "Flat throughout — no drop shadows anywhere in the system; depth comes from ink-heavy borders, dashed perforation, and the navy sidebar, never from elevation.",
-      "A diagonal, hand-stamped VOID mark (SVG turbulence filter, not a clean CSS box) covers closed/rejected pipeline cards without removing them."
+      "Neutral ink/paper chrome everywhere — buttons, borders, and body text carry no hue of their own. Colour is reserved for what must stay scannable or for the ambient glow, never for decoration.",
+      "A faint, slowly-drifting two-colour radial glow (indigo + magenta) sits behind the whole app and a stronger version behind the sidebar. Every backdrop-filter: blur() panel genuinely blurs this glow.",
+      "Geist (variable) for all display and body type; IBM Plex Mono kept, narrowly, for genuinely tabular figures.",
+      "Rounded throughout on the shadcn --radius scale (6/8/10px, pill for tags and small controls).",
+      "Soft elevation: translucent panels carry a blurred shadow instead of the old system's flat, shadow-free ink borders."
     ],
     "rules": [
-      { "name": "The One Accent Rule", "body": "Jet red is the only color allowed to signal \"act on this,\" \"this is live,\" or \"this is the brand.\" Carbon purple never substitutes for it, even when both would be visually legible — purple means \"duplicate or stale,\" never \"go.\"", "section": "colors" },
-      { "name": "The Stamped, Not Colored Rule", "body": "A cleared/good state is rendered as a navy ink stamp (tag-good: navy fill, paper text) rather than a green badge. Green is held back for the Today health-check dots only. This replaced an earlier off-world generic-green tag-good during finish review.", "section": "colors" },
-      { "name": "The Living Mark Rule", "body": "The Unslog logo mark's accent is bound to var(--action), the system's single committed accent token, rather than a hue fixed to the mark itself. The mark's shape (rounded-square tile, up-right arrow, two underline bars) and the \"Unslog\" name are the fixed brand asset; its color is not — it always matches whichever world currently owns --action (jet red for The Ticket Wallet). Confirmed in PRODUCT.md's Brand Commitments.", "section": "colors" },
-      { "name": "The All-Caps Label Rule", "body": "Every UI label (nav, button, tag, tab, table header, field label) is set in uppercase Big Shoulders Display with positive letter-spacing. Body prose is never set in display face or uppercase.", "section": "typography" },
-      { "name": "The Tabular Everything Rule", "body": "Any number a user scans to compare — score, salary, date, count — is set in IBM Plex Mono with tabular figures.", "section": "typography" },
-      { "name": "The Flat Stock Rule", "body": "Nothing in this system lifts off the page with a shadow. A card reads as a cut and printed piece of ticket stock lying flat, bordered by ink, not a floating surface.", "section": "elevation" }
+      { "name": "The One Accent Rule, translated", "body": "Action-indigo is the only colour allowed to signal \"act on this\" or \"this is live\" in UI chrome — carried over unchanged from the old system, with the hue swapped from jet red to indigo so it can double as a glow stop colour.", "section": "colors" },
+      { "name": "The Glass-Is-an-Effect Rule", "body": "backdrop-filter: blur() only appears on a surface that sits over the ambient glow. Glass is never applied where there is nothing behind it to blur.", "section": "elevation" },
+      { "name": "The One Type Voice Rule", "body": "Geist carries both display and body type; hierarchy comes from weight and size, never from uppercase tracking or a second display face. Mono is reserved for genuinely tabular figures.", "section": "typography" }
     ],
     "dos": [
-      "Do set every score, date, salary figure, and count in IBM Plex Mono with tabular numerals.",
-      "Do use the .tear perforation (dashed rule + punched ends) as the divider between a card's content and its action row, instead of a plain border or shadow.",
-      "Do keep jet red reserved for primary actions and the single \"live/actionable\" signal per view.",
-      "Do render closed/rejected pipeline items with the VOID stamp over an intact card — never delete or hide a closed application.",
-      "Do use carbon purple only for duplicate-sighting or follow-up-due signals; never as a second brand accent.",
-      "Do keep the Unslog logo mark's accent bound to var(--action) rather than a fixed hue of its own, so it always matches the live system's accent. Confirmed brand commitment per PRODUCT.md."
+      "Do keep IBM Plex Mono with tabular numerals for every score, date, salary, and count.",
+      "Do reserve backdrop-filter: blur() for surfaces that sit over the ambient glow; never add it decoratively.",
+      "Do keep action-indigo reserved for primary actions and the one \"live/actionable\" signal per view.",
+      "Do keep attention-magenta scoped to duplicate-sighting / follow-up-due signals only."
     ],
     "donts": [
-      "Don't add a drop shadow anywhere in this system — depth comes from ink borders and the tear perforation, not elevation.",
-      "Don't render a \"cleared\"/good status as a green tag or badge; green is reserved for the Today health-check dots only.",
-      "Don't mix carbon purple and jet red as competing accents on the same element.",
-      "Don't set body prose in Big Shoulders Display or in uppercase; the display face is for labels and headings only."
+      "Don't reintroduce uppercase condensed display type for body prose.",
+      "Don't add glass/blur to a panel with no ambient glow behind it.",
+      "Don't mix attention-magenta and action-indigo as competing accents on the same element."
     ]
   }
 }

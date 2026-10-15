@@ -1,4 +1,4 @@
--- Callback: initial schema
+-- Unslog: initial schema
 --
 -- Two kinds of tables:
 --   * Shared job data (sources, companies, jobs, sightings, skills). Written only by the

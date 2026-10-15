@@ -83,7 +83,7 @@ The MVP is designed for one owner who runs the pipeline, with RLS already isolat
 
 ## Responsible collection
 
-Callback reads emails that sites send you, calls Jooble's documented API, and reads job lists
+Unslog reads emails that sites send you, calls Jooble's documented API, and reads job lists
 that companies publish publicly through their applicant tracking systems. It doesn't scrape job
 boards, log in as you, or submit applications. It identifies itself with a User-Agent and waits
 between requests. Before adding a source, read its terms.

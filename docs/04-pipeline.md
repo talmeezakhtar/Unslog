@@ -164,4 +164,5 @@ profile and are edited in the dashboard.
 | `DRAFT_TOP_N` / `DIGEST_TOP_N` | 10 / 10 | How many jobs get drafts / appear in the digest |
 | `HTTP_DELAY_MS` | 1500 | Politeness gap between requests to a host |
 | `ALLOWED_USER_IDS` | (everyone) | Comma-separated user ids the pipeline serves |
+| `SHARED_AI_MAX_JOBS_PER_USER_PER_DAY` | 20 | Per-user cap on AI calls against the shared key (BYOK users aren't capped by this) |
 | `LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error`, `silent` |

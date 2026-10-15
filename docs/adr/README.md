@@ -1,6 +1,6 @@
 # Architecture decision records
 
-Short notes on why Callback is built the way it is. Each one records the context, the decision,
+Short notes on why Unslog is built the way it is. Each one records the context, the decision,
 the options we didn't take, and the consequences. Add a new numbered file when a decision
 changes; don't rewrite old ones.
 

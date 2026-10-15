@@ -1,32 +1,36 @@
 /*
- * Design tokens. Restyle the whole app from here: colours, type, spacing, radii.
- * Palette: coupon-stock paper, carrier-navy ink, jet-red as the one committed working
- * accent (buttons, live state, score stamps), carbon-purple reserved for duplicate
- * sightings / follow-ups, so a job seen on three sites and a job due for a nudge never
- * read as the same signal.
+ * Design tokens. Restyle the whole app from here: colours, type, spacing.
+ * Glass-and-gradient system: neutral ink/paper chrome throughout (buttons, borders, text),
+ * colour lives in the ambient background glow and in the handful of signals that encode real
+ * data — the fit score's fill, visa/attention tags, destructive/good status. One indigo accent
+ * (--action) carries primary intent; it doubles as a stop colour in the ambient glow so the
+ * accent and the background read as one material, not two.
+ * Radii, the five chart hues, and --focus's base colour are shared with the Tailwind/shadcn
+ * tokens defined in app.css (--radius, --chart-1..5, --primary) so the hand-rolled component
+ * CSS below and the Tailwind-driven sign-up screen stay one system.
  */
 :root {
-  --ground: #f3efe4;
-  --surface: #fffdf8;
-  --surface-sunken: #ece7d8;
-  --ink: #13203a;
-  --ink-muted: #5b6273;
-  --line: #d9d2bf;
-  --line-strong: #a9a08a;
+  --ground: oklch(0.986 0.002 260);
+  --surface: oklch(1 0 0);
+  --surface-sunken: oklch(0.96 0.003 260);
+  --ink: oklch(0.145 0 0);
+  --ink-muted: oklch(0.47 0.01 260);
+  --line: oklch(0.9 0.004 260);
+  --line-strong: oklch(0.78 0.006 260);
 
-  --action: #d7262d;
-  --action-ink: #fffdf8;
-  --action-soft: #fbe2df;
-  --attention: #4b2e83;
-  --attention-soft: #e7e0f3;
-  --danger: #b0191f;
-  --good: #1f6b4d;
-  /* Chart series colours, checked for colour-blind separation and contrast (light + dark). */
-  --chart-1: #d7262d;
-  --chart-2: #13203a;
+  --action: oklch(0.55 0.21 276);
+  --action-ink: oklch(0.99 0 0);
+  --action-soft: oklch(0.95 0.03 276);
+  --attention: oklch(0.52 0.19 332);
+  --attention-soft: oklch(0.95 0.03 332);
+  --danger: oklch(0.577 0.245 27.325);
+  --good: oklch(0.6 0.13 155);
+  /* The hand-rolled SVG charts' two-series fills (Insights page) — distinct from Tailwind's --chart-1..5. */
+  --series-1: oklch(0.55 0.02 260);
+  --series-2: oklch(0.75 0.14 70);
 
-  --font-display: 'Big Shoulders Display', 'Segoe UI', system-ui, sans-serif;
-  --font-body: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Geist Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Geist Variable', 'Segoe UI', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   /* Type scale (1.25 ratio) */
@@ -45,29 +49,5 @@
   --space-6: 32px;
   --space-7: 48px;
 
-  --radius-sm: 3px;
-  --radius-md: 5px;
-  --radius-lg: 8px;
   --focus: 0 0 0 3px color-mix(in srgb, var(--action) 45%, transparent);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ground: #10161f;
-    --surface: #182030;
-    --surface-sunken: #1f2a3d;
-    --ink: #eceef3;
-    --ink-muted: #9aa3b8;
-    --line: #2d3b52;
-    --line-strong: #495a79;
-    --action: #ef5a52;
-    --action-ink: #10161f;
-    --action-soft: #3a2024;
-    --attention: #b6a3e8;
-    --attention-soft: #2a2447;
-    --danger: #ff8178;
-    --good: #6fcf9e;
-    --chart-1: #ef5a52;
-    --chart-2: #b6a3e8;
-  }
 }

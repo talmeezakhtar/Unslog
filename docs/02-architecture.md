@@ -1,6 +1,6 @@
 # Architecture
 
-Callback is two programs that share one database: a **pipeline** that runs on a schedule and
+Unslog is two programs that share one database: a **pipeline** that runs on a schedule and
 writes jobs, scores and drafts, and a **dashboard** where you read them and record what you do.
 There is no always-on server.
 
@@ -48,7 +48,7 @@ reads Supabase directly, protected by RLS, so there is no API layer to write or 
 ## Folder layout
 
 ```
-callback/
+unslog/
 ├── .github/workflows/
 │   ├── daily.yml            # the morning run
 │   └── ci.yml               # typecheck, tests (real Postgres), web build

@@ -1,7 +1,18 @@
+import { X } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { Link } from '../lib/router';
 import { VISA_LABEL, ago, sourceNames } from '../lib/format';
 import type { Match } from '../lib/types';
+
+/** Monogram for a company/person name: up to two initials, letters/digits only (handles "AT&T", "H&M"). */
+export const initials = (name?: string | null) =>
+  (name ?? '')
+    .split(' ')
+    .map((w) => w.replace(/[^a-zA-Z0-9]/g, ''))
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]!.toUpperCase())
+    .join('') || '?';
 
 /** The score tile: the number, with a fill that rises with the score. */
 export function Score({ value, size = 'md', label }: { value: number | null; size?: 'md' | 'lg'; label?: string }) {
@@ -52,14 +63,20 @@ export function JobTags({ match }: { match: Match }) {
   );
 }
 
-export function JobRow({ match, action }: { match: Match; action?: ReactNode }) {
+export function JobRow({ match, action, onReview }: { match: Match; action?: ReactNode; onReview?: () => void }) {
   return (
     <div className="job-row">
       <Score value={match.score} />
       <div className="body">
-        <Link to={`/jobs/${match.job.id}`} className="job-title">
-          {match.job.title}
-        </Link>
+        {onReview ? (
+          <button type="button" className="job-title" onClick={onReview}>
+            {match.job.title}
+          </button>
+        ) : (
+          <Link to={`/jobs/${match.job.id}`} className="job-title">
+            {match.job.title}
+          </Link>
+        )}
         <JobMeta match={match} />
         <JobTags match={match} />
       </div>
@@ -110,7 +127,7 @@ export function ChipInput({ id, values, onChange, placeholder }: { id: string; v
         <span className="chip" key={v}>
           {v}
           <button type="button" aria-label={`Remove ${v}`} onClick={() => onChange(values.filter((x) => x !== v))}>
-            ×
+            <X className="w-3.5 h-3.5" />
           </button>
         </span>
       ))}

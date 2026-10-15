@@ -1,16 +1,18 @@
+import { AnimatePresence, motion } from 'framer-motion';
+import { BarChart3, Briefcase, KanbanSquare, SlidersHorizontal, SquareCheckBig, Send, type LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { aiUsageToday, followUpsDue } from '../lib/api';
 import { useAsync } from '../lib/hooks';
 import { Link, usePath } from '../lib/router';
 import { supabase } from '../lib/supabase';
 
-const NAV = [
-  { to: '/', label: 'Today' },
-  { to: '/jobs', label: 'Jobs' },
-  { to: '/pipeline', label: 'Pipeline' },
-  { to: '/outreach', label: 'Outreach' },
-  { to: '/insights', label: 'Insights' },
-  { to: '/settings', label: 'Settings' },
+const NAV: Array<{ to: string; label: string; icon: LucideIcon }> = [
+  { to: '/', label: 'Today', icon: SquareCheckBig },
+  { to: '/jobs', label: 'Jobs', icon: Briefcase },
+  { to: '/pipeline', label: 'Pipeline', icon: KanbanSquare },
+  { to: '/outreach', label: 'Outreach', icon: Send },
+  { to: '/insights', label: 'Insights', icon: BarChart3 },
+  { to: '/settings', label: 'Settings', icon: SlidersHorizontal },
 ];
 
 export function Logo() {
@@ -38,7 +40,8 @@ export function Layout({ children, email }: { children: ReactNode; email: string
         </Link>
         {NAV.map((n) => (
           <Link key={n.to} to={n.to} className="nav-link" aria-current={active(n.to) ? 'page' : undefined}>
-            {n.label}
+            <n.icon className="nav-link-icon" size={18} aria-hidden="true" />
+            <span className="nav-link-label">{n.label}</span>
             {n.to === '/pipeline' && (due.data?.length ?? 0) > 0 && (
               <span className="nav-count" aria-label={`${due.data!.length} follow-ups due`}>
                 {due.data!.length}
@@ -55,7 +58,17 @@ export function Layout({ children, email }: { children: ReactNode; email: string
         </div>
       </nav>
       <main className="main" id="main">
-        {children}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={path}
+            initial={{ opacity: 0, y: 6, filter: 'blur(6px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            style={{ display: 'grid', gap: 'var(--space-5)', minWidth: 0 }}
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
       </main>
     </div>
   );

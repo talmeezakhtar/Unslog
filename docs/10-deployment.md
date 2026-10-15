@@ -36,7 +36,7 @@ rewrites every path to `index.html`, so deep links like `/jobs/123` work.
 The Supabase free plan has no point-in-time recovery. For a personal backup:
 
 ```bash
-pg_dump "$DATABASE_URL" --no-owner --format=custom --file=callback-$(date +%F).dump
+pg_dump "$DATABASE_URL" --no-owner --format=custom --file=unslog-$(date +%F).dump
 ```
 
 ## Monitoring checklist

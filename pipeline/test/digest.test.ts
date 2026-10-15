@@ -11,10 +11,10 @@ const content = {
 
 describe('digest formatting', () => {
   it('escapes HTML in Telegram messages and links to the dashboard', () => {
-    const msg = digestTelegram(content, 'https://callback.example');
+    const msg = digestTelegram(content, 'https://unslog.example');
     assert.match(msg, /Dev &lt;script&gt;/);
     assert.match(msg, /A &amp; B/);
-    assert.match(msg, /href="https:\/\/callback\.example\/jobs\/j1"/);
+    assert.match(msg, /href="https:\/\/unslog\.example\/jobs\/j1"/);
     assert.match(msg, /Follow-ups due \(1\)/);
   });
 

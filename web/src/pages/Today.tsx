@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { collectorHealth, followUpsDue, profile, setApplicationStatus, todaySummary, topMatches } from '../lib/api';
 import { ago, greeting } from '../lib/format';
 import { useAction, useAsync } from '../lib/hooks';
 import { Link } from '../lib/router';
 import { Empty, ErrorBox, JobRow, Loading } from '../components/ui';
+import { Modal } from '../components/ui/modal';
+import { JobDetail } from './JobDetail';
 
 const COLLECTOR_NAME: Record<string, string> = { gmail: 'Email alerts', jooble: 'Jooble' };
 const collectorName = (c: string) => COLLECTOR_NAME[c] ?? (c.startsWith('ats:') ? `${c.split(':')[2]} careers page` : c);
@@ -14,9 +17,16 @@ export function Today() {
   const due = useAsync(followUpsDue);
   const health = useAsync(collectorHealth);
   const save = useAction();
+  const [reviewId, setReviewId] = useState<string | null>(null);
+  const closeReview = () => {
+    setReviewId(null);
+    top.reload();
+    due.reload();
+  };
 
   const s = summary.data;
   const count = top.data?.length ?? 0;
+  const reviewTitle = top.data?.find((m) => m.job.id === reviewId)?.job.title ?? due.data?.find((a) => a.job_id === reviewId)?.job?.title ?? 'Job details';
 
   if (!me.loading && !me.data) {
     return (
@@ -83,14 +93,15 @@ export function Today() {
                 <li key={m.id}>
                   <JobRow
                     match={m}
+                    onReview={() => setReviewId(m.job.id)}
                     action={
                       <div style={{ display: 'flex', gap: 8 }}>
                         <button className="btn btn-small" disabled={save.busy} onClick={() => save.run(() => setApplicationStatus(m.job.id, 'saved'), 'Saved to your pipeline').then((ok) => ok && top.reload())}>
                           Save
                         </button>
-                        <Link to={`/jobs/${m.job.id}`} className="btn btn-small btn-primary">
+                        <button className="btn btn-small btn-primary" onClick={() => setReviewId(m.job.id)}>
                           Review
-                        </Link>
+                        </button>
                       </div>
                     }
                   />
@@ -114,9 +125,9 @@ export function Today() {
               <ul className="list">
                 {due.data!.map((a) => (
                   <li key={a.id}>
-                    <Link to={`/jobs/${a.job_id}`} className="job-title" style={{ fontSize: '1rem' }}>
+                    <button type="button" className="job-title" style={{ fontSize: '1rem' }} onClick={() => setReviewId(a.job_id)}>
                       {a.job?.title}
-                    </Link>
+                    </button>
                     <div className="meta">
                       <span>{a.job?.company?.name}</span>
                       <span>applied {ago(a.applied_at)}</span>
@@ -151,6 +162,10 @@ export function Today() {
           </section>
         </div>
       </div>
+
+      <Modal open={reviewId !== null} onClose={closeReview} title={reviewTitle}>
+        {reviewId && <JobDetail id={reviewId} onClose={closeReview} />}
+      </Modal>
     </>
   );
 }

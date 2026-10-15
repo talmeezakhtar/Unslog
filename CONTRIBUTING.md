@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping. Callback is a small codebase on purpose: please keep it readable.
+Thanks for helping. Unslog is a small codebase on purpose: please keep it readable.
 
 ## Setup
 
@@ -11,7 +11,7 @@ Postgres (see [docs/09-testing.md](docs/09-testing.md)).
 
 ```bash
 npm run typecheck
-TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/callback_test npm test
+TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/unslog_test npm test
 npm run build
 ```
 
