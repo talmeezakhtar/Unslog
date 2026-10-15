@@ -77,6 +77,11 @@ export function App() {
   }, []);
 
   const loadedProfile = useAsync(() => (session ? fetchProfile() : Promise.resolve(null)), [session?.user.id]);
+  // pastWelcome only matters right after Onboarding finishes, before loadedProfile has
+  // refetched — a reload re-derives everything from the saved profile instead, so an
+  // already-onboarded user never gets routed back through the welcome screen just by
+  // refreshing the page.
+  const needsOnboarding = !pastWelcome && !loadedProfile.data?.full_name;
 
   if (session === undefined) return null;
   return (
@@ -84,7 +89,7 @@ export function App() {
       <ToastProvider>
         {!session ? (
           <SignIn />
-        ) : loadedProfile.loading ? null : !pastWelcome ? (
+        ) : loadedProfile.loading ? null : needsOnboarding ? (
           <Onboarding profileComplete={!!loadedProfile.data?.full_name} onDone={() => setPastWelcome(true)} />
         ) : (
           <Layout email={session.user.email ?? null}>

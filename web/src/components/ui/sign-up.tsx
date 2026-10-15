@@ -140,7 +140,7 @@ export const AuthComponent = ({ logo = <DefaultLogo />, brandName = "EaseMize" }
             <h1 className="text-base font-bold text-foreground">{brandName}</h1>
         </div>
 
-        <div className={cn("flex w-full flex-1 h-full items-center justify-center bg-card", "relative overflow-hidden")}>
+        <div className={cn("flex w-full flex-1 h-full items-center justify-center bg-card pt-20", "relative overflow-hidden")}>
             <div className="absolute inset-0 z-0"><GradientBackground /></div>
             <fieldset disabled={sending} className="relative z-10 flex flex-col items-center gap-8 w-[280px] mx-auto p-4">
                 <AnimatePresence mode="wait">
